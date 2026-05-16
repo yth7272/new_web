@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 
 ROOT = Path(__file__).resolve().parent
@@ -40,7 +39,7 @@ def read_asset(path: str) -> str:
 def render_template(template_path: str, *, height: int = 1200) -> None:
     css = read_asset("assets/tokens.css")
     html = read_asset(template_path).replace("{{TOKENS_CSS}}", css)
-    components.html(html, height=height, scrolling=True)
+    st.html(html, width="stretch")
 
 
 def render_placeholder(page_key: str, page_title: str, intent: str, *, height: int = 900) -> None:
@@ -93,4 +92,4 @@ def render_placeholder(page_key: str, page_title: str, intent: str, *, height: i
     </body>
     </html>
     """
-    components.html(html, height=height, scrolling=True)
+    st.html(html, width="stretch")
