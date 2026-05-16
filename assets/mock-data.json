@@ -36,7 +36,7 @@
   "routines": [
     {
       "id": "routine-001",
-      "title": "오늘의 탄력 루틴",
+      "title": "오늘의 유효성분 침투 루틴",
       "likes": 128,
       "productIds": ["device-halo", "booster-glow"]
     }

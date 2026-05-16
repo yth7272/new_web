@@ -1,7 +1,4 @@
 from pathlib import Path
-import hmac
-import os
-import tomllib
 
 import streamlit as st
 
@@ -44,7 +41,7 @@ MENU_HTML = """
           <a href="/BOOSTER">부스터 루틴팩 <span class="cp-menu-status">P1</span></a>
           <a href="/GIFT">선물하기 큐레이션 <span class="cp-menu-status">P1</span></a>
           <a href="/BOOSTER">데일리 글로우 라인</a>
-          <a href="/BOOSTER">펌업 라인</a>
+          <a href="/BOOSTER">Fomular 모드</a>
           <a href="/BOOSTER">라이트 라인</a>
           <a href="/BOOSTER">베어 라인</a>
           <a href="/BOOSTER">클리어 라인</a>
@@ -219,71 +216,13 @@ FOOTER_HTML = """
 """
 
 
-def expected_password() -> str | None:
-    try:
-        password = st.secrets.get("APP_PASSWORD")
-        if password:
-            return str(password)
-    except Exception:
-        pass
-
-    password = os.environ.get("APP_PASSWORD")
-    if password:
-        return password
-
-    local_secrets = ROOT / ".streamlit" / "secrets.toml"
-    if local_secrets.exists():
-        return tomllib.loads(local_secrets.read_text(encoding="utf-8-sig")).get("APP_PASSWORD")
-    return None
-
-
-def require_password() -> None:
-    if st.session_state.get("prototype_unlocked"):
-        return
-
-    st.markdown(
-        """
-        <style>
-        .block-container { max-width: 520px; padding-top: 18vh; }
-        header[data-testid="stHeader"] { display: none; }
-        section[data-testid="stSidebar"] { display: none; }
-        button[data-testid="stBaseButton-headerNoPadding"] { display: none; }
-        div[data-testid="stToolbar"] { display: none; }
-        div[data-testid="stDecoration"] { display: none; }
-        div[data-testid="stStatusWidget"] { display: none; }
-        div[data-testid="stAppDeployButton"] { display: none; }
-        #MainMenu, footer { visibility: hidden; }
-        .cp-login-title { font-size: 34px; font-weight: 900; letter-spacing: -0.04em; margin-bottom: 8px; }
-        .cp-login-copy { color: #4f565f; line-height: 1.6; margin-bottom: 24px; }
-        </style>
-        <div class="cp-login-title">CuraPulse Prototype</div>
-        <div class="cp-login-copy">회의용 프로토타입입니다. 비밀번호를 입력하면 페이지를 볼 수 있습니다.</div>
-        """,
-        unsafe_allow_html=True,
-    )
-    configured_password = expected_password()
-    if not configured_password:
-        st.error("APP_PASSWORD가 설정되지 않았습니다.")
-        st.stop()
-
-    password = st.text_input("Password", type="password", label_visibility="collapsed")
-    if st.button("Enter", type="primary", use_container_width=True):
-        if hmac.compare_digest(password, configured_password):
-            st.session_state["prototype_unlocked"] = True
-            st.rerun()
-        st.error("비밀번호가 맞지 않습니다.")
-    st.stop()
-
-
-def setup_page(title: str, *, require_auth: bool = False) -> None:
+def setup_page(title: str) -> None:
     st.set_page_config(
         page_title=f"{title} | CuraPulse Prototype",
         page_icon="CP",
         layout="wide",
         initial_sidebar_state="collapsed",
     )
-    if require_auth:
-        require_password()
     st.markdown(
         """
         <style>
