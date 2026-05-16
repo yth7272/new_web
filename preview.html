@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CuraPulse IA Master Board v0.1</title>
+<style>
+  :root {
+    --bg:#f7f5f0; --paper:#fffdf8; --ink:#1e2329; --muted:#667085; --line:#e6dfd2;
+    --brand:#1f5b4f; --brand2:#d68a36; --soft:#eef5f2; --soft2:#fff4e7; --danger:#b42318;
+    --shadow: 0 12px 26px rgba(30,35,41,.08); --radius:18px;
+  }
+  * {box-sizing:border-box}
+  body {margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif;}
+  a {color:inherit}
+  .page {max-width:1480px; margin:0 auto; padding:22px;}
+  header {position:sticky; top:0; z-index:20; margin:-22px -22px 18px; padding:18px 22px 14px; background:linear-gradient(180deg,rgba(247,245,240,.98),rgba(247,245,240,.9)); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+  .topbar {display:flex; gap:18px; align-items:flex-start; justify-content:space-between;}
+  h1 {font-size:28px; margin:0 0 8px; letter-spacing:-.03em;}
+  .subtitle {color:var(--muted); font-size:14px; line-height:1.55; max-width:940px}
+  .actions {display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end}
+  button, select, input {font:inherit}
+  button {border:1px solid var(--line); background:var(--paper); border-radius:12px; padding:9px 12px; cursor:pointer; box-shadow:0 1px 0 rgba(0,0,0,.02)}
+  button.primary {background:var(--brand); color:white; border-color:var(--brand)}
+  button:hover {transform:translateY(-1px)}
+  .meta {display:flex; gap:8px; flex-wrap:wrap; margin-top:9px}
+  .pill {display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line); border-radius:999px; padding:5px 9px; font-size:12px; background:rgba(255,255,255,.66); color:#344054}
+  .pill.dark {background:#1e2329; color:white; border-color:#1e2329}
+  .pill.brand {background:var(--soft); color:var(--brand); border-color:#d4e7e1}
+  .pill.warn {background:var(--soft2); color:#9a5a11; border-color:#f3d3aa}
+  .layout {display:grid; grid-template-columns: 1fr; gap:18px;}
+  .section {background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px;}
+  .section h2 {margin:0 0 12px; font-size:18px; letter-spacing:-.02em; display:flex; align-items:center; gap:8px}
+  .section .hint {font-size:12px; color:var(--muted); margin-top:-6px; margin-bottom:12px}
+  .grid-3 {display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+  .grid-4 {display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+  .grid-8 {display:grid; grid-template-columns:repeat(8,1fr); gap:8px}
+  .card {border:1px solid var(--line); border-radius:15px; padding:14px; background:#fff; min-width:0}
+  .card.soft {background:linear-gradient(180deg,#fff,#fbf8f0)}
+  .card h3 {margin:0 0 6px; font-size:16px; letter-spacing:-.02em}
+  .card p {margin:0; font-size:13px; line-height:1.5; color:#475467}
+  .kpi {display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-top:12px}
+  .kpi .card {padding:12px}
+  .kpi b {display:block; font-size:22px; margin-bottom:3px}
+  .tiny {font-size:11px; color:var(--muted)}
+  .gnb-row {display:grid; grid-template-columns:repeat(8,1fr); gap:8px; margin-top:10px}
+  .gnb-chip {text-align:center; padding:10px 8px; border:1px solid #cfe2dc; background:var(--soft); color:var(--brand); border-radius:12px; font-weight:700; font-size:12px}
+  .strategy .card {position:relative; overflow:hidden}
+  .strategy .card:after {content:""; position:absolute; right:-26px; top:-26px; width:80px; height:80px; border-radius:50%; background:rgba(31,91,79,.08)}
+  .strategy .big {font-size:26px; font-weight:800; letter-spacing:-.04em}
+  .controls {display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+  .controls input, .controls select {border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:white; min-height:40px}
+  .controls input {min-width:300px; flex:1}
+  .legend {display:flex; flex-wrap:wrap; gap:6px; margin-top:10px}
+  .status {display:inline-flex; align-items:center; justify-content:center; border-radius:999px; padding:4px 8px; font-size:11px; font-weight:800; letter-spacing:-.01em; white-space:nowrap}
+  .st-GO {background:#e8f5ee; color:#157347}
+  .st-MODIFY {background:#fff4e5; color:#a15c05}
+  .st-PENDING {background:#f2f4f7; color:#344054}
+  .st-HIDE {background:#eceff3; color:#475467}
+  .st-LATER {background:#eef4ff; color:#3538cd}
+  .st-DROP {background:#fee4e2; color:#b42318}
+  .st-DEV_CHECK {background:#e6f0ff; color:#175cd3}
+  .st-POLICY_CHECK {background:#f4e8ff; color:#7a2dbb}
+  .st-SKU_CHECK {background:#fff2cc; color:#8a5a00}
+  .st-RANDD_CHECK {background:#e9f7f8; color:#0e6f75}
+  .phase {font-size:11px; font-weight:800; background:#111827; color:white; border-radius:8px; padding:3px 7px; display:inline-flex}
+  .tags {display:flex; gap:5px; flex-wrap:wrap; margin:8px 0}
+  .tag {font-size:11px; background:#f2f4f7; color:#344054; padding:4px 7px; border-radius:8px}
+  .tag.risk {background:#fff0ed; color:#b42318}
+  .gnb-grid {display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+  .gnb-card h3 {display:flex; justify-content:space-between; align-items:center; gap:8px}
+  .tree {padding-left:0; list-style:none; margin:9px 0 0}
+  .tree li {font-size:12px; color:#344054; padding:5px 0; border-top:1px dashed #eee5d8}
+  .deliver-list {display:flex; flex-wrap:wrap; gap:5px; margin-top:10px}
+  .deliver-list span {font-size:11px; padding:4px 7px; background:#faf3e8; border:1px solid #f1dfc5; border-radius:8px; color:#7a4b12}
+  .board-grid {display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+  .node {border:1px solid var(--line); border-radius:16px; background:white; padding:13px; display:flex; flex-direction:column; gap:8px}
+  .node.hide-card {display:none}
+  .node-head {display:flex; justify-content:space-between; gap:10px; align-items:flex-start}
+  .node-title {font-weight:800; font-size:15px; letter-spacing:-.02em}
+  .node-id {font-size:11px; color:var(--muted); margin-bottom:2px}
+  .node-summary {font-size:12px; color:#475467; line-height:1.5}
+  details {border-top:1px dashed #e8e0d4; padding-top:8px}
+  summary {cursor:pointer; font-weight:700; font-size:12px; color:#344054}
+  .mini-list {margin:7px 0 0; padding-left:18px}
+  .mini-list li {font-size:12px; color:#475467; line-height:1.45; margin:3px 0}
+  .field-label {font-size:11px; font-weight:800; color:#667085; margin-top:2px}
+  textarea {width:100%; min-height:54px; border:1px solid var(--line); border-radius:10px; padding:8px; resize:vertical; font-size:12px; background:#fffdf9}
+  .status-select {width:100%; border:1px solid var(--line); border-radius:10px; padding:8px; background:#fff}
+  table {width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:14px; border:1px solid var(--line)}
+  th,td {padding:10px; border-bottom:1px solid var(--line); border-right:1px solid var(--line); font-size:12px; vertical-align:top; line-height:1.45}
+  th {background:#f8f4ea; text-align:left; color:#344054; font-size:11px; text-transform:uppercase; letter-spacing:.02em}
+  td:last-child, th:last-child {border-right:0}
+  tr:last-child td {border-bottom:0}
+  .flow {display:grid; grid-template-columns:repeat(4,1fr); gap:10px}
+  .flow-card {position:relative; padding:14px; border-radius:15px; border:1px solid var(--line); background:white}
+  .flow-card .num {font-size:11px; color:white; background:var(--brand); border-radius:7px; padding:3px 6px; display:inline-flex; margin-bottom:7px; font-weight:800}
+  .flow-card h3 {font-size:14px; margin:0 0 4px}
+  .flow-card p {font-size:12px; color:#475467; margin:0; line-height:1.45}
+  .dep-grid {display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+  .dep-card {background:white; border:1px solid var(--line); border-radius:15px; padding:13px}
+  .dep-card h3 {font-size:14px; margin:0 0 6px}
+  .decision-status {min-width:124px}
+  .footer-note {font-size:11px; color:var(--muted); line-height:1.6}
+  .two-col {display:grid; grid-template-columns:1.1fr .9fr; gap:12px}
+  .clickup-box {background:#111827; color:white; border-radius:16px; padding:16px}
+  .clickup-box h3 {margin:0 0 8px}
+  .clickup-box p {color:#d0d5dd; font-size:13px; line-height:1.5}
+  .clickup-box code {background:rgba(255,255,255,.12); padding:2px 5px; border-radius:6px}
+  @media (max-width:1180px) {.grid-3,.grid-4,.gnb-grid,.board-grid,.dep-grid,.flow,.two-col {grid-template-columns:1fr 1fr} .gnb-row,.grid-8 {grid-template-columns:repeat(4,1fr)}}
+  @media (max-width:760px) {.page {padding:12px} header {margin:-12px -12px 14px; padding:14px 12px} .topbar {flex-direction:column} .grid-3,.grid-4,.gnb-grid,.board-grid,.dep-grid,.flow,.two-col,.kpi {grid-template-columns:1fr} .gnb-row,.grid-8 {grid-template-columns:repeat(2,1fr)} .controls input {min-width:100%}}
+  @media print {header {position:static} .actions,.controls,textarea,.status-select,.no-print {display:none!important} body {background:white} .page {max-width:none} .section {break-inside:avoid; box-shadow:none} .board-grid,.gnb-grid,.dep-grid,.flow {grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="page">
+<header>
+  <div class="topbar">
+    <div>
+      <h1>CuraPulse 자사몰 IA Master Board <span class="tiny">v0.1 Draft</span></h1>
+      <div class="subtitle">v4 마케팅 가이드와 260513 회의 내용을 한 장에 합친 의사결정 보드입니다. 목적은 “전체 구조를 보는 것”이 아니라, 각 IA 노드를 <b>진행 / 수정 / 보류 / 숨김 / 삭제</b>로 판정하고 바로 ClickUp 태스크로 바꾸는 것입니다.</div>
+      <div class="meta">
+        <span class="pill dark">회의용 초안</span><span class="pill brand">단일 HTML</span><span class="pill warn">구현 가능 / 어려움 / 숨김 판정</span><span class="pill">기준: Marketing Brief v4 + 음성회의</span>
+      </div>
+    </div>
+    <div class="actions no-print">
+      <button onclick="toggleCompact()">Compact 보기</button>
+      <button onclick="window.print()">인쇄 / PDF</button>
+      <button class="primary" onclick="exportCSV()">ClickUp CSV 추출</button>
+    </div>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="section strategy" id="strategy">
+    <h2>1. Strategy Bridge — ON / IN / MIND ↔ 실제 GNB</h2>
+    <div class="hint">회의에서 가장 혼란스러웠던 지점: ON/IN/MIND는 마케팅 대전제, DEVICE/BOOSTER/INNER/CALM은 실제 자사몰 클릭 메뉴.</div>
+    <div class="grid-3" id="pillarCards"></div>
+    <div class="gnb-row" id="gnbRow"></div>
+    <div class="kpi" id="kpis"></div>
+  </section>
+
+  <section class="section no-print">
+    <h2>2. 회의 컨트롤 — 검색 / 필터 / 상태값</h2>
+    <div class="controls">
+      <input id="searchInput" placeholder="검색: 정품등록, PULSE PICK, AI, SKU, SCIENCE..." oninput="renderNodes()" />
+      <select id="gnbFilter" onchange="renderNodes()"><option value="ALL">GNB 전체</option></select>
+      <select id="statusFilter" onchange="renderNodes()"><option value="ALL">상태 전체</option></select>
+      <select id="domainFilter" onchange="renderNodes()"><option value="ALL">담당영역 전체</option></select>
+      <button onclick="clearFilters()">필터 초기화</button>
+    </div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="section" id="gnbMap">
+    <h2>3. GNB IA Tree — 8개 메뉴 전체 그림</h2>
+    <div class="hint">각 카드에는 해당 GNB의 정체성, 핵심 하위 노드, 필요한 결과물이 들어갑니다.</div>
+    <div class="gnb-grid" id="gnbCards"></div>
+  </section>
+
+  <section class="section" id="nodeBoard">
+    <h2>4. Node Cards — 노드별 결과물 / 완료기준 / 결정사항</h2>
+    <div class="hint">상태와 메모는 브라우저 localStorage에 저장됩니다. 회의 중 판정 후 CSV로 추출하세요.</div>
+    <div class="board-grid" id="nodes"></div>
+  </section>
+
+  <section class="section" id="multiEntry">
+    <h2>5. Multi-Entry Matrix — 라인별 / 고민별 / 유형별 / 선물하기</h2>
+    <div class="hint">단순 카테고리가 아니라 상품 태그, 필터, 진열 룰, 카피가 동시에 필요합니다.</div>
+    <table id="entryTable"></table>
+  </section>
+
+  <section class="section" id="mainFlow">
+    <h2>6. Main Page Flow — 고객이 첫 화면에서 이해해야 하는 흐름</h2>
+    <div class="flow" id="flowCards"></div>
+  </section>
+
+  <section class="section" id="systemDeps">
+    <h2>7. System Dependency Map — 개발팀/외주가 먼저 봐야 하는 영역</h2>
+    <div class="hint">IA 노드가 실제 시스템 기능으로 변하는 지점입니다. 여기서 난이도와 범위를 판정합니다.</div>
+    <div class="dep-grid" id="depCards"></div>
+  </section>
+
+  <section class="section" id="decisions">
+    <h2>8. Decision Backlog — 미결 의사결정</h2>
+    <div class="hint">미결 사항을 확정처럼 쓰지 않기 위해 별도 표로 분리했습니다.</div>
+    <table id="decisionTable"></table>
+  </section>
+
+  <section class="section" id="exportView">
+    <h2>9. ClickUp 변환 규칙 — 보드에서 태스크로</h2>
+    <div class="two-col">
+      <div class="clickup-box">
+        <h3>생성 규칙</h3>
+        <p><code>GO</code>는 실행 태스크, <code>MODIFY</code>는 수정기획 태스크, <code>DEV CHECK</code>는 개발 검증 태스크, <code>POLICY CHECK</code>는 법무/정책 검토 태스크, <code>SKU CHECK</code>는 상품/운영 검토 태스크로 변환합니다. <code>HIDE/LATER</code>는 백로그, <code>DROP</code>은 제외합니다.</p>
+        <button class="primary" onclick="exportCSV()">현재 상태 기준 CSV 추출</button>
+      </div>
+      <div class="card soft">
+        <h3>ClickUp 필드 초안</h3>
+        <p><b>List</b>: GNB 또는 담당영역<br><b>Task</b>: 노드별 산출물명<br><b>Deliverable</b>: 실제 결과물<br><b>Acceptance Criteria</b>: 완료 판정 기준<br><b>Dependency</b>: 선행조건<br><b>Risk</b>: DEV/POLICY/SKU/R&D/CONTENT<br><b>Memo</b>: 회의 중 입력한 메모</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>10. 기준 자료 / 사용 주의</h2>
+    <p class="footer-note">이 보드는 원문 문서를 대체하지 않습니다. v4 가이드와 음성회의 결정사항을 한 화면에서 토론하기 위한 시각적 인덱스입니다. 미결 사항은 반드시 Decision Backlog에 남기고, 법무/개인정보/표시광고/임상표현 검토가 필요한 항목은 확정 태스크로 바로 넘기지 마세요. 특히 AI 댓글 자동화와 추천 리워드는 정책 검토 후 구현 범위를 결정해야 합니다.</p>
+  </section>
+</main>
+</div>
+
+<script>
+const PILLARS = [{"name": "ON", "subtitle": "피부 위에서 작동하는 케어", "maps": ["DEVICE", "BOOSTER"], "consumer": "디바이스와 바르는 부스터로 피부 표면 케어를 완성", "internal": "디바이스 판매 + 부스터 소모품 + 루틴팩/솔로/PULSE PICK"}, {"name": "IN", "subtitle": "몸 안에서 작동하는 케어", "maps": ["INNER"], "consumer": "먹는 이너뷰티로 속부터 케어", "internal": "이너뷰티 임상 완료 후 라인/루틴팩/PICK 확장"}, {"name": "MIND", "subtitle": "스트레스·마음까지 보는 케어", "maps": ["CALM"], "consumer": "향·수면·스트레스 케어로 피부 컨디션까지 연결", "internal": "뉴로코스메틱 → 향 MVP → 향후 디바이스/뇌케어 확장"}];
+const GNBS = [{"name": "DEVICE", "identity": "디바이스 + 서비스", "pillar": "ON", "phase": "P1", "owner": "IT · DESIGN · CS", "risk": "DEV/POLICY", "summary": "모델 진열과 디바이스 서비스 5종. 정품등록이 CRM/A/S/리워드의 핵심 진입점.", "tree": ["듀얼테트라", "듀얼테트라 프로", "듀얼테트라 헤일로", "액세서리 / 정품 부품", "디바이스 서비스 > 비교하기 · 사용법 · 정품 인증번호 등록 · 셀러브리티/앰버서더 · 체험단"], "deliverables": ["모델 비교표", "사용법 튜토리얼", "정품등록 UX/DB", "A/S 연결 플로우", "체험단 운영안"]}, {"name": "BOOSTER", "identity": "외용 화장품", "pillar": "ON", "phase": "P1", "owner": "SKU · CONTENT · DESIGN", "risk": "CONTENT/SKU", "summary": "부스터 루틴팩, 솔로 7개, PULSE PICK을 먼저 매출화. 라인 슬로건 확정 필요.", "tree": ["부스터 루틴팩", "부스터 솔로 > 데일리 글로우 · 펌업 · 라이트 · 베어 · 클리어 · 컴포트", "PULSE PICK", "MY BOOSTER ROUTINE"], "deliverables": ["SKU 마스터", "라인명/슬로건", "상표권 검색", "상품 상세 카피", "PULSE PICK 조합표"]}, {"name": "INNER", "identity": "경구용 이너뷰티", "pillar": "IN", "phase": "P2/HIDE", "owner": "R&D · CONTENT · SKU", "risk": "R&D/CONTENT", "summary": "임상 완료 전까지 준비중 또는 숨김 처리. 슬립 라인은 CALM과 교차 노출.", "tree": ["이너 루틴팩", "이너 솔로 > 콜라겐 · 글로우 · 디톡스 · 안티에이징 · 슬립", "INNER PICK", "MY INNER ROUTINE"], "deliverables": ["임상 결과 반영", "라인 슬로건 사전 정의", "상품 등록 후보", "흡수/작용 원리 콘텐츠"]}, {"name": "CALM", "identity": "뉴로코스메틱", "pillar": "MIND", "phase": "P1/P2", "owner": "R&D · CONTENT · SKU", "risk": "R&D/POLICY", "summary": "향 MVP를 먼저 고려하고, 수면/무드/스트레스/텐션/아로마 라인으로 확장.", "tree": ["캄 루틴팩", "캄 솔로 > 슬립 · 무드 · 데이 · 텐션 · 아로마", "CALM PICK", "MY CALM ROUTINE"], "deliverables": ["향 MVP 정의", "뉴로코스메틱 설명문", "효능표현 검토", "CALM 라인 슬로건"]}, {"name": "SCIENCE", "identity": "임상 · 원리", "pillar": "COMMON", "phase": "P1", "owner": "R&D · CONTENT · POLICY", "risk": "POLICY/R&D", "summary": "DEVICE SCIENCE 우선 오픈. 제품 상세에는 사이언스 모듈 6요소 적용.", "tree": ["DEVICE SCIENCE", "BOOSTER SCIENCE", "INNER SCIENCE", "CALM SCIENCE", "임상 데이터 라이브러리", "R&D · 인증 · 파트너십"], "deliverables": ["6요소 상세 템플릿", "임상표기 체크리스트", "Claude→MD→GPT 검수 SOP", "논문/인증 목록"]}, {"name": "COMMUNITY", "identity": "UGC · 리뷰 · 멤버십", "pillar": "COMMON", "phase": "P1/P2", "owner": "OPS · CONTENT · AI · POLICY", "risk": "POLICY/DEV", "summary": "ROUTINE LAB MVP와 리뷰 통합 먼저. AI 댓글은 공식 AI 루틴 코치/승인형으로 검토.", "tree": ["ROUTINE LAB", "리뷰", "라이브 방송", "멤버십", "체험단 > 일반 체험단 · 디바이스 체험단"], "deliverables": ["루틴랩 기능정의", "리뷰 정책", "시드 콘텐츠", "멤버십/리워드 정책", "AI 운영 가이드"]}, {"name": "BRAND", "identity": "브랜드 우산", "pillar": "COMMON", "phase": "P1/P2", "owner": "BRAND · CONTENT", "risk": "CONTENT", "summary": "PHILOSOPHY와 ON/IN/MIND 설명을 고객이 이해할 수 있게 압축. 앰버서더/EWG는 2차.", "tree": ["PHILOSOPHY", "앰버서더 / 셀러브리티", "EWG / 지속가능성", "비앙글로", "회사 소개 / 뉴스", "매장 안내", "채용"], "deliverables": ["브랜드 철학 원고", "ON/IN/MIND 쉬운 설명", "비앙글로 소개", "회사소개/뉴스", "숨김 메뉴 기준"]}, {"name": "SUPPORT", "identity": "고객 지원", "pillar": "COMMON", "phase": "P1", "owner": "CS · POLICY · IT", "risk": "CS/POLICY", "summary": "FAQ, 1:1 문의, 배송·반품, 스킨케어 사용법. 정품등록/A/S와 연결 필요.", "tree": ["공지", "FAQ", "1:1 문의", "배송 · 반품", "스킨케어 사용법", "A/S 안내"], "deliverables": ["FAQ 문서", "배송/반품 정책", "A/S 안내", "정품등록 연동 문구", "CS 매크로"]}];
+const NODES = [{"id": "DEV-001", "gnb": "DEVICE", "title": "디바이스 모델 진열", "phase": "P1", "status": "GO", "domains": ["IT", "DESIGN", "CONTENT"], "risk": ["CONTENT"], "summary": "듀얼테트라/프로/헤일로 모델을 비교 가능한 상품 진열 구조로 구성.", "deliverables": ["모델별 제품 카드", "상세페이지 연결", "가격/스펙/효과 비교 항목"], "acceptance": "3개 모델 카드와 상세 연결 구조가 와이어프레임에 반영됨.", "decisions": ["헤일로를 빠른 진입 바에 노출할지 결정", "모델별 가격/효과 표현 가능 범위 확인"], "dependencies": ["상품 상세 원천자료", "모델별 스펙표"], "clickup": "디바이스 모델 진열 IA/와이어프레임 작성"}, {"id": "DEV-002", "gnb": "DEVICE", "title": "디바이스 비교하기", "phase": "P1", "status": "GO", "domains": ["IT", "DESIGN", "CONTENT"], "risk": ["CONTENT"], "summary": "3개 모델의 스펙·효과·가격을 비교하고 진단형 추천으로 연결.", "deliverables": ["비교표 UI", "추천 질문 5~7개", "모델별 추천 기준"], "acceptance": "고객이 질문 또는 표를 보고 모델 선택 가능.", "decisions": ["진단형 추천을 1차에 넣을지", "비교 기준 항목 확정"], "dependencies": ["모델별 스펙", "가격 정책"], "clickup": "디바이스 비교하기 페이지 기능정의"}, {"id": "DEV-003", "gnb": "DEVICE", "title": "디바이스 사용법 튜토리얼", "phase": "P1", "status": "GO", "domains": ["CONTENT", "DESIGN", "CS"], "risk": ["CONTENT"], "summary": "모델별 사용 영상/단계별 가이드/부위별 FAQ를 구성.", "deliverables": ["튜토리얼 원고", "영상/이미지 자리표시", "부위별 FAQ"], "acceptance": "사용 전/사용 중/사용 후 가이드가 한 페이지에 정리됨.", "decisions": ["영상 유무", "부위별 사용 금지/주의 표현"], "dependencies": ["제품 사용설명서", "CS FAQ"], "clickup": "디바이스 사용법 튜토리얼 콘텐츠 구성"}, {"id": "DEV-004", "gnb": "DEVICE", "title": "정품 인증번호 등록", "phase": "P1", "status": "DEV CHECK", "domains": ["IT", "CS", "POLICY", "CRM"], "risk": ["DEV", "POLICY", "CRM"], "summary": "정품번호 등록 → 고객 DB → A/S → 리워드로 이어지는 핵심 CRM 진입점.", "deliverables": ["입력폼 UX", "시리얼번호 DB/검증 로직", "회원 ID 매핑", "A/S 연결 플로우", "개인정보 동의문", "등록 완료 리워드 문구"], "acceptance": "회원ID·시리얼·구매정보·A/S 플로우·동의항목이 하나의 명세서로 정의됨.", "decisions": ["비회원 등록 허용 여부", "정품등록 리워드 지급 여부", "중복 등록 방지 기준", "A/S 자동/수동 연결"], "dependencies": ["시리얼 발급 방식", "Cafe24 회원/적립금 API 확인", "개인정보 동의 문구"], "clickup": "정품 인증번호 등록 기능 명세서 작성"}, {"id": "BOS-001", "gnb": "BOOSTER", "title": "부스터 루틴팩", "phase": "P1", "status": "GO", "domains": ["SKU", "CONTENT", "DESIGN", "OPS"], "risk": ["SKU", "CONTENT"], "summary": "초보자가 1·2·3 step으로 바로 사용할 수 있는 저가형/간편형 루틴 상품.", "deliverables": ["루틴팩 구성표", "1/2/3 step 설명", "패키지/상세페이지 구조", "유통기한 통일 정책"], "acceptance": "루틴팩별 구성, 사용순서, 유통기한 기준이 확정됨.", "decisions": ["루틴팩 명칭 최종 확정", "몇 개 팩을 1차 오픈할지", "세트 유통기한 기준"], "dependencies": ["제품 구성", "입고/제조 일정", "패키지 디자인"], "clickup": "부스터 루틴팩 상품 구조 및 운영정책 정리"}, {"id": "BOS-002", "gnb": "BOOSTER", "title": "부스터 솔로 7개", "phase": "P1", "status": "SKU CHECK", "domains": ["SKU", "CONTENT", "R&D", "DESIGN"], "risk": ["SKU", "R&D", "CONTENT"], "summary": "동국바이오제약/셀브룸 라인업을 큐라펄스 솔로 상품으로 큐레이션.", "deliverables": ["SKU 마스터", "상품명 공식", "라인명/슬로건", "주요 성분/사용법", "상표권 검색 요청"], "acceptance": "7개 솔로 제품이 카테고리·라인·유형·가격·콘텐츠 원천자료와 연결됨.", "decisions": ["7개 최종 픽 확정", "제품명 큐라펄스화 방식", "상표권 검색 완료 전 임시명 사용 여부"], "dependencies": ["원천 상품자료", "임상/논문 자료", "가격/재고"], "clickup": "부스터 솔로 7개 SKU 마스터 작성"}, {"id": "BOS-003", "gnb": "BOOSTER", "title": "PULSE PICK", "phase": "P1", "status": "GO", "domains": ["SKU", "CONTENT", "AI", "DESIGN"], "risk": ["SKU", "CONTENT"], "summary": "디바이스와 부스터 솔로를 조합한 추천 루틴. 고민별 구매 전환의 핵심.", "deliverables": ["고민별 조합표", "디바이스+솔로 연결", "추천 카피", "장바구니 연결 구조"], "acceptance": "모공/미백/탄력/진정 등 고민별로 추천 조합과 링크가 정의됨.", "decisions": ["PULSE PICK 명칭 표기", "AI 추천 룰을 1차에 넣을지", "전문가 루틴과 분리 여부"], "dependencies": ["솔로 SKU", "디바이스 모델", "고민별 진입로"], "clickup": "PULSE PICK 고민별 조합표 작성"}, {"id": "BOS-004", "gnb": "BOOSTER", "title": "MY BOOSTER ROUTINE", "phase": "P2", "status": "LATER", "domains": ["IT", "AI", "COMMUNITY"], "risk": ["DEV", "POLICY"], "summary": "사용자가 직접 구성한 부스터 루틴을 저장/공유하는 확장 기능.", "deliverables": ["셀프 큐레이션 UX", "저장/공유 정책", "제품 태그"], "acceptance": "P2 기능 범위로 백로그화됨.", "decisions": ["ROUTINE LAB과 합칠지", "유료화/공유 기능 여부"], "dependencies": ["ROUTINE LAB MVP", "상품 태그 시스템"], "clickup": "MY BOOSTER ROUTINE P2 백로그 정의"}, {"id": "IN-001", "gnb": "INNER", "title": "INNER 준비중 구조", "phase": "P2/HIDE", "status": "HIDE", "domains": ["R&D", "CONTENT", "SKU"], "risk": ["R&D", "CONTENT"], "summary": "임상 결과 전까지 준비중 처리. 임상 완료 후 이너 루틴팩/솔로/PICK로 확장.", "deliverables": ["준비중 페이지 문구", "임상 후 오픈 기준", "라인명 사전안"], "acceptance": "오픈 시 노출/숨김 방식이 결정됨.", "decisions": ["1차 오픈에서 메뉴만 둘지", "준비중 문구 노출 여부", "8월 임상 후 전환 기준"], "dependencies": ["이너뷰티 임상 결과", "상품 후보"], "clickup": "INNER 준비중/숨김 처리 기준 작성"}, {"id": "CAL-001", "gnb": "CALM", "title": "CALM 향 MVP", "phase": "P1/P2", "status": "PENDING", "domains": ["R&D", "CONTENT", "SKU", "POLICY"], "risk": ["R&D", "POLICY"], "summary": "MIND 축의 첫 실행물로 향/아로마를 먼저 검토. 뉴로코스메틱 설명을 쉽게 풀어야 함.", "deliverables": ["향 MVP 정의", "고객용 설명문", "효능표현 가이드", "상품 후보"], "acceptance": "1차 노출/준비중/숨김 중 하나로 결정됨.", "decisions": ["향을 P1에 노출할지", "CALM 메뉴를 준비중으로 둘지", "스트레스 표현 가능 범위"], "dependencies": ["향 제품 개발/입고", "법무/표현 검토"], "clickup": "CALM 향 MVP 노출 기준 결정"}, {"id": "SCI-001", "gnb": "SCIENCE", "title": "DEVICE SCIENCE 우선 오픈", "phase": "P1", "status": "GO", "domains": ["R&D", "CONTENT", "DESIGN", "POLICY"], "risk": ["R&D", "POLICY"], "summary": "디바이스 작용원리와 임상/안전성 근거를 SCIENCE 첫 페이지로 구성.", "deliverables": ["작용원리 1페이지 요약", "임상/인증 목록", "시각화 모듈", "표현 검수"], "acceptance": "DEVICE SCIENCE 페이지 골격과 원천 자료 링크가 완성됨.", "decisions": ["의료기기/안전성 표현 범위", "IC 등급 마킹 문구"], "dependencies": ["R&D 자료", "정책 검토"], "clickup": "DEVICE SCIENCE 1차 원고 및 구조 작성"}, {"id": "SCI-002", "gnb": "SCIENCE", "title": "사이언스 모듈 6요소", "phase": "P1", "status": "GO", "domains": ["R&D", "CONTENT", "DESIGN", "POLICY"], "risk": ["POLICY", "CONTENT"], "summary": "전 제품 상세에 헤드라인→메커니즘→성분카드→임상차트→인증뱃지→CTA를 표준화.", "deliverables": ["6요소 템플릿", "임상 표기 체크리스트", "상세페이지 컴포넌트"], "acceptance": "신규 상세페이지에 적용 가능한 모듈 스펙이 확정됨.", "decisions": ["제품별 최소 근거 수준", "자체시험 표기 방식"], "dependencies": ["임상/성분 자료", "디자인 시스템"], "clickup": "사이언스 모듈 6요소 상세 템플릿 제작"}, {"id": "SCI-003", "gnb": "SCIENCE", "title": "임상 데이터 AI 파이프라인", "phase": "P1", "status": "GO", "domains": ["AI", "R&D", "CONTENT", "POLICY"], "risk": ["R&D", "POLICY"], "summary": "Claude 초안 → MD 저장 → GPT 크로스체크 → 사람 검수 → 게시로 이어지는 문서화 SOP.", "deliverables": ["AI 문서화 SOP", "MD 저장 규칙", "검수 프롬프트", "게시 전 체크리스트"], "acceptance": "R&D 원천자료에서 SCIENCE 초안까지의 절차가 문서화됨.", "decisions": ["최종 검수자", "AI 이미지 사용 범위", "원천자료 폴더 구조"], "dependencies": ["임상 자료", "논문 자료", "R&D 담당자"], "clickup": "임상 데이터 AI 문서화 SOP 작성"}, {"id": "COM-001", "gnb": "COMMUNITY", "title": "ROUTINE LAB MVP", "phase": "P1", "status": "DEV CHECK", "domains": ["IT", "COMMUNITY", "CONTENT", "SKU"], "risk": ["DEV", "POLICY"], "summary": "사용자/전문가 루틴 게시, 좋아요, 제품 태그, 구매 연결을 가진 커뮤니티 MVP.", "deliverables": ["기능정의서", "게시글/댓글/좋아요", "제품 태그", "시드 콘텐츠 10~20개", "신고/모니터링 기준"], "acceptance": "개발 견적 가능한 수준의 MVP 기능 범위가 확정됨.", "decisions": ["사용자 루틴과 전문가 루틴 분리", "댓글 자동화 방식", "제품 태그 클릭 후 이동 경로"], "dependencies": ["게시판 기능", "상품 태그", "운영 정책"], "clickup": "ROUTINE LAB MVP 기능정의서 작성"}, {"id": "COM-002", "gnb": "COMMUNITY", "title": "리뷰 통합", "phase": "P1", "status": "GO", "domains": ["COMMUNITY", "IT", "CS", "POLICY"], "risk": ["POLICY"], "summary": "제품별 후기 통합, 사진/영상 후기 가중치, 포토 후기 적립금 정책.", "deliverables": ["리뷰 노출 규칙", "포토/영상 후기 기준", "적립금 정책", "금칙어/효능표현 모니터링"], "acceptance": "리뷰 작성/노출/보상/삭제 기준이 확정됨.", "decisions": ["리뷰 적립금 금액", "영상 후기 우대 여부", "효능 주장 삭제 기준"], "dependencies": ["상품 상세", "멤버십 정책"], "clickup": "리뷰 통합 운영정책 작성"}, {"id": "COM-003", "gnb": "COMMUNITY", "title": "루니티 멤버십/추천 리워드", "phase": "P1 설계 / P2 구현", "status": "POLICY CHECK", "domains": ["CRM", "IT", "POLICY", "FINANCE"], "risk": ["POLICY", "DEV", "FINANCE"], "summary": "회원 등급, 추천코드, 리워드 원장, 1-depth MVP와 2-depth 검토를 분리.", "deliverables": ["추천 리워드 정책서", "회원/추천/주문/리워드 ERD", "악용 방지 정책", "정산 시뮬레이션", "Cafe24 한계 검증"], "acceptance": "1-depth MVP와 2-depth 보류/검토 기준이 문서화됨.", "decisions": ["추천 depth", "리워드 지급 수단", "추천 리워드 상한", "법무 검토 범위"], "dependencies": ["Cafe24 회원/적립금 API", "법무 검토", "수익성 시뮬레이션"], "clickup": "루니티 추천 리워드 정책서 v0.1 작성"}, {"id": "COM-004", "gnb": "COMMUNITY", "title": "AI 루틴 코치 / 커뮤니티 보조", "phase": "P1 정책 / P2 구현", "status": "POLICY CHECK", "domains": ["AI", "COMMUNITY", "POLICY", "CONTENT"], "risk": ["POLICY", "CONTENT"], "summary": "가짜 일반 유저 댓글이 아니라 공식 AI 루틴 코치/운영자 승인형 댓글로 전환 검토.", "deliverables": ["AI 표시 정책", "답변 범위", "금지 표현", "승인 플로우", "루틴 추천 룰셋"], "acceptance": "AI가 일반 사용자 체험을 가장하지 않는 운영 원칙이 확정됨.", "decisions": ["임의 계정 방식 폐기 여부", "공식 AI 계정명", "자동게시 vs 담당자 승인"], "dependencies": ["ROUTINE LAB MVP", "표시광고/후기 정책", "제품 추천 룰"], "clickup": "AI 루틴 코치 운영 정책서 작성"}, {"id": "COM-005", "gnb": "COMMUNITY", "title": "라이브 방송", "phase": "P2", "status": "LATER", "domains": ["CONTENT", "IT", "POLICY"], "risk": ["POLICY", "DEV"], "summary": "주간/월간 라이브 커머스와 라이브 전용 할인/증정 운영. 표시광고 가이드 필요.", "deliverables": ["라이브 운영안", "송출 인프라 검토", "실시간 표현 가이드"], "acceptance": "P2 백로그와 정책 검토 항목으로 등록됨.", "decisions": ["정기 라이브 주기", "라이브 혜택", "게스트 운영"], "dependencies": ["상품 오픈", "표시광고 가이드"], "clickup": "라이브 커머스 P2 백로그 정의"}, {"id": "BRD-001", "gnb": "BRAND", "title": "PHILOSOPHY / ON·IN·MIND 설명", "phase": "P1", "status": "GO", "domains": ["BRAND", "CONTENT", "DESIGN"], "risk": ["CONTENT"], "summary": "일반 소비자가 어려워하지 않도록 브랜드 대전제와 실제 카테고리명을 나란히 설명.", "deliverables": ["고객용 쉬운 카피", "ON/IN/MIND 매핑 블록", "브랜드 철학 페이지 원고"], "acceptance": "메인과 브랜드 페이지에서 ON/IN/MIND와 DEVICE/BOOSTER/INNER/CALM 연결이 명확히 보임.", "decisions": ["메인 노출 위치", "영상/인플루언서 설명 필요 여부"], "dependencies": ["최종 카피 승인", "브랜드 톤"], "clickup": "ON/IN/MIND 고객용 설명 블록 작성"}, {"id": "SUP-001", "gnb": "SUPPORT", "title": "고객지원 / A/S 안내", "phase": "P1", "status": "GO", "domains": ["CS", "POLICY", "IT"], "risk": ["CS", "POLICY"], "summary": "공지, FAQ, 1:1 문의, 배송/반품, 스킨케어 사용법, A/S 안내를 정품등록과 연결.", "deliverables": ["FAQ", "배송/반품 정책", "A/S 접수 플로우", "CS 답변 매크로"], "acceptance": "정품등록 고객이 A/S 접수까지 이어지는 고객지원 동선이 정의됨.", "decisions": ["A/S 자동접수 여부", "정품등록 미완료 고객 처리"], "dependencies": ["정품등록 명세", "CS 정책"], "clickup": "SUPPORT 고객지원/A/S 플로우 정리"}, {"id": "OPS-001", "gnb": "COMMERCE OPS", "title": "SKU Master / 세트 유통기한", "phase": "P1", "status": "SKU CHECK", "domains": ["SKU", "OPS", "CS"], "risk": ["SKU", "OPS"], "summary": "단일 SKU 11개 우선 등록, 루틴팩/세트는 가장 짧은 유통기한 기준으로 운영 검토.", "deliverables": ["SKU 마스터 CSV", "세트 구성표", "입고/재고/유통기한 정책", "상품 등록 체크리스트"], "acceptance": "단일 SKU 등록 가능 상태와 세트 운영 기준이 정리됨.", "decisions": ["단일 SKU 11개 최종 범위", "세트 상품 생성 방식", "유통기한 표시 기준"], "dependencies": ["상품 원천자료", "물류/입고 정보"], "clickup": "SKU 마스터 및 세트 유통기한 정책 작성"}, {"id": "MUL-001", "gnb": "MULTI-ENTRY", "title": "다중 진입로 매트릭스", "phase": "P1", "status": "GO", "domains": ["IT", "SKU", "DESIGN", "CONTENT"], "risk": ["DEV", "SKU"], "summary": "라인별·고민별·유형별·선물하기 진입을 상품 태그와 진열 룰로 연결.", "deliverables": ["카테고리 매핑표", "상품 태그 규칙", "필터/진열 UX", "선물하기 큐레이션 룰"], "acceptance": "각 상품이 라인/고민/유형/선물 분류값을 갖고 있음.", "decisions": ["고민 카테고리 수", "선물하기 P1 포함 여부", "상품 중복 노출 방식"], "dependencies": ["SKU 마스터", "GNB 구조", "디자인 와이어프레임"], "clickup": "다중 진입로 상품 매핑표 작성"}, {"id": "MAIN-001", "gnb": "MAIN", "title": "메인 페이지 진입 동선", "phase": "P1", "status": "GO", "domains": ["DESIGN", "CONTENT", "IT"], "risk": ["CONTENT"], "summary": "GNB→빠른 진입 바→Hero→ON/IN/MIND→라인 카드→SCIENCE→ROUTINE LAB→LIVE→PHILOSOPHY.", "deliverables": ["메인 와이어프레임", "섹션별 카피", "링크 구조", "노출 우선순위"], "acceptance": "고객이 첫 화면에서 세계관과 구매 진입로를 동시에 이해함.", "decisions": ["ON/IN/MIND 설명 블록 위치", "LIVE 섹션 1차 노출 여부", "빠른 진입 바 항목"], "dependencies": ["GNB 확정", "브랜드 카피", "상품 매핑"], "clickup": "메인 페이지 진입 동선 와이어프레임 작성"}];
+const ENTRY_MATRIX = [{"type": "라인별", "question": "나는 어떤 라인으로 고를까?", "examples": "데일리 글로우 · 펌업 · 라이트 · 베어 · 클리어 · 컴포트", "needs": "라인명/슬로건, 대표 이미지, 상표권 검색, 라인별 상품 태그"}, {"type": "고민별", "question": "내 고민은 탄력/미백/진정/슬립/모공이다", "examples": "탄력=헤일로+펌업+콜라겐 / 미백=디바이스+라이트+글로우", "needs": "고민 taxonomy, 추천 룰, PULSE PICK 연결, 상세페이지 링크"}, {"type": "유형별", "question": "앰플/세럼/크림/캡슐처럼 유형으로 사고 싶다", "examples": "외용=토너·앰플·세럼·크림·패드 / 이너=캡슐·분말·액상", "needs": "SKU 속성값, 필터 UI, 중복 노출 정책"}, {"type": "선물하기", "question": "누구에게, 얼마대로 선물할까?", "examples": "시즌별 · 가격대별 · 받는 사람별 · 선물 포장/메시지 카드", "needs": "가격대 태그, 시즌 운영표, 선물 옵션, 메시지/영수증 정책"}];
+const SYSTEM_DEPS = [{"name": "정품등록 CRM", "links": "회원ID ↔ 시리얼번호 ↔ 구매정보 ↔ A/S ↔ 리워드", "owner": "IT · CS · POLICY", "risk": "개인정보/DB/적립금", "phase": "P1"}, {"name": "추천 리워드", "links": "회원가입 ↔ 추천코드 ↔ 주문 ↔ 리워드 원장 ↔ 정산", "owner": "CRM · IT · FINANCE · POLICY", "risk": "법무/정산/악용방지", "phase": "P1 설계"}, {"name": "ROUTINE LAB", "links": "게시글 ↔ 제품태그 ↔ 좋아요 ↔ 댓글 ↔ 구매연결", "owner": "IT · COMMUNITY · CONTENT", "risk": "운영/후기표현/AI", "phase": "P1 MVP"}, {"name": "AI 루틴 추천", "links": "고민 ↔ 루틴팩 ↔ PULSE PICK ↔ 상품 링크 ↔ 공식 AI 코치", "owner": "AI · CONTENT · R&D", "risk": "가짜 후기/효능 표현", "phase": "P1 정책"}, {"name": "임상 데이터 파이프라인", "links": "원천자료 ↔ Claude 초안 ↔ MD 저장 ↔ GPT 크로스체크 ↔ 사람 검수", "owner": "R&D · AI · POLICY", "risk": "근거/과장표현", "phase": "P1"}, {"name": "SKU/세트 운영", "links": "단일 SKU ↔ 루틴팩 ↔ 세트 상품 ↔ 재고 ↔ 유통기한", "owner": "SKU · OPS · CS", "risk": "입고/재고/유통기한", "phase": "P1"}];
+const DECISIONS = [{"id": "D-001", "topic": "ON/IN/MIND를 메인에 어느 정도 노출할 것인가", "options": "강노출 / 축소 / 내부용", "recommendation": "메인 초반에 쉽게 설명", "owner": "대표 · 본부장", "status": "PENDING"}, {"id": "D-002", "topic": "BOOSTER 라인명/슬로건 최종 확정", "options": "현재안 / 수정안 / 임시명", "recommendation": "상표권 검색 후 확정", "owner": "마케팅 · 법무", "status": "POLICY CHECK"}, {"id": "D-003", "topic": "정품등록 리워드 지급 여부", "options": "지급 / 미지급 / 쿠폰만", "recommendation": "회원 한정 지급, 중복 방지", "owner": "대표 · CS · 개발", "status": "DEV CHECK"}, {"id": "D-004", "topic": "추천 리워드 depth", "options": "1-depth / 2-depth / 보류", "recommendation": "1-depth MVP, 2-depth 법무검토", "owner": "대표 · 법무 · 재무", "status": "POLICY CHECK"}, {"id": "D-005", "topic": "AI 댓글 자동화 방식", "options": "임의 계정 / 공식 AI / 수동 승인", "recommendation": "공식 AI 루틴 코치 + 승인형", "owner": "대표 · AI · 정책", "status": "POLICY CHECK"}, {"id": "D-006", "topic": "INNER 1차 오픈 방식", "options": "즉시 / 준비중 / 숨김", "recommendation": "준비중 또는 숨김", "owner": "대표 · R&D", "status": "PENDING"}, {"id": "D-007", "topic": "CALM 첫 상품/페이지", "options": "향 MVP / 준비중 / 숨김", "recommendation": "향 MVP 가능성 검토", "owner": "대표 · 상품 · R&D", "status": "PENDING"}, {"id": "D-008", "topic": "IC 등급/안전성 마킹 문구", "options": "표기 / 축소표기 / 보류", "recommendation": "정책 검토 후 문구 확정", "owner": "R&D · 법무", "status": "POLICY CHECK"}, {"id": "D-009", "topic": "루틴팩 유통기한 기준", "options": "최단 유통기한 기준 / 개별표기 / 세트별 수동관리", "recommendation": "최단 유통기한 기준", "owner": "운영 · CS", "status": "SKU CHECK"}, {"id": "D-010", "topic": "LIVE 섹션 1차 노출 여부", "options": "노출 / 숨김 / 예정만 노출", "recommendation": "P2 또는 예정만 노출", "owner": "마케팅 · 개발", "status": "PENDING"}];
+const FLOW = [{"step": "01", "title": "GNB", "desc": "DEVICE · BOOSTER · INNER · CALM · SCIENCE · COMMUNITY · BRAND · SUPPORT"}, {"step": "02", "title": "추천 빠른 진입 바", "desc": "PULSE PICK · 헤일로 · 데일리 글로우 · 펌업 · 슬립 케어 · 선물하기"}, {"step": "03", "title": "Hero", "desc": "피부 위로, 몸 안으로, 마음까지"}, {"step": "04", "title": "ON / IN / MIND 설명", "desc": "ON=DEVICE+BOOSTER / IN=INNER / MIND=CALM"}, {"step": "05", "title": "4개 케어 라인 카드", "desc": "DEVICE · BOOSTER · INNER · CALM"}, {"step": "06", "title": "SCIENCE 티저", "desc": "근거가 있는 뷰티 — 임상으로 증명"}, {"step": "07", "title": "ROUTINE LAB", "desc": "지금 인기 있는 루틴 / 전문가 루틴"}, {"step": "08", "title": "LIVE / PHILOSOPHY / Footer", "desc": "라이브 예고 · 브랜드 철학 · 고객지원"}];
+const LEGEND = {"GO": "1차 진행", "MODIFY": "수정 필요", "PENDING": "결정 대기", "HIDE": "숨김", "LATER": "2차 이후", "DROP": "삭제", "DEV CHECK": "개발검토", "POLICY CHECK": "정책검토", "SKU CHECK": "상품검토", "R&D CHECK": "R&D검토"};
+const STATUS_ORDER = ["GO","MODIFY","PENDING","HIDE","LATER","DROP","DEV CHECK","POLICY CHECK","SKU CHECK","R&D CHECK"];
+const DOMAIN_ORDER = ["IT","DESIGN","CONTENT","SKU","OPS","CS","R&D","AI","POLICY","CRM","FINANCE","COMMUNITY","BRAND"];
+let compact = false;
+function cssStatus(s) { return 'st-' + s.replace(/ /g,'_').replace(/&/g,'AND').replace(/[^A-Za-z0-9_-]/g,''); }
+function esc(v) { return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function savedStatus(id, fallback) { return localStorage.getItem('status_' + id) || fallback; }
+function saveStatus(id, val) { localStorage.setItem('status_' + id, val); renderNodes(); renderKPIs(); }
+function saveMemo(id, val) { localStorage.setItem('memo_' + id, val); }
+function getMemo(id) { return localStorage.getItem('memo_' + id) || ''; }
+function renderPillars() {
+  document.getElementById('pillarCards').innerHTML = PILLARS.map(p => `
+    <div class="card soft">
+      <div class="big">${esc(p.name)}</div>
+      <h3>${esc(p.subtitle)}</h3>
+      <div class="tags">${p.maps.map(m=>`<span class="pill brand">${esc(m)}</span>`).join('')}</div>
+      <p><b>고객 언어:</b> ${esc(p.consumer)}</p>
+      <p style="margin-top:6px"><b>내부 실행:</b> ${esc(p.internal)}</p>
+    </div>`).join('');
+  document.getElementById('gnbRow').innerHTML = GNBS.map(g => `<div class="gnb-chip" onclick="setGnb('${esc(g.name)}')">${esc(g.name)}</div>`).join('');
+}
+function renderKPIs() {
+  const current = NODES.map(n => ({...n, s:savedStatus(n.id,n.status)}));
+  const count = (pred) => current.filter(pred).length;
+  const kpis = [
+    [NODES.length, '총 IA 노드'],
+    [count(n=>n.phase.includes('P1')), 'P1 관련 노드'],
+    [count(n=>['DEV CHECK','POLICY CHECK','SKU CHECK','R&D CHECK','PENDING'].includes(n.s)), '회의 판정 필요'],
+    [count(n=>n.risk.includes('POLICY')), '정책/법무 리스크'],
+    [DECISIONS.length, '미결 의사결정']
+  ];
+  document.getElementById('kpis').innerHTML = kpis.map(k => `<div class="card"><b>${k[0]}</b><span class="tiny">${k[1]}</span></div>`).join('');
+}
+function renderControls() {
+  const gnbSelect = document.getElementById('gnbFilter');
+  [...new Set(NODES.map(n=>n.gnb))].forEach(g => gnbSelect.insertAdjacentHTML('beforeend', `<option value="${esc(g)}">${esc(g)}</option>`));
+  const st = document.getElementById('statusFilter');
+  STATUS_ORDER.forEach(s => st.insertAdjacentHTML('beforeend', `<option value="${esc(s)}">${esc(s)} · ${esc(LEGEND[s]||'')}</option>`));
+  const d = document.getElementById('domainFilter');
+  DOMAIN_ORDER.forEach(x => d.insertAdjacentHTML('beforeend', `<option value="${esc(x)}">${esc(x)}</option>`));
+  document.getElementById('legend').innerHTML = STATUS_ORDER.map(s => `<span class="status ${cssStatus(s)}">${esc(s)} · ${esc(LEGEND[s]||'')}</span>`).join('');
+}
+function setGnb(g) { document.getElementById('gnbFilter').value = g; renderNodes(); document.getElementById('nodeBoard').scrollIntoView({behavior:'smooth'}); }
+function clearFilters() { ['searchInput','gnbFilter','statusFilter','domainFilter'].forEach(id => { const el=document.getElementById(id); el.value = id==='searchInput' ? '' : 'ALL'; }); renderNodes(); }
+function renderGnbCards() {
+  document.getElementById('gnbCards').innerHTML = GNBS.map(g => `
+    <div class="card gnb-card">
+      <h3><span>${esc(g.name)}</span><span class="phase">${esc(g.phase)}</span></h3>
+      <div class="tags"><span class="tag">${esc(g.pillar)}</span><span class="tag">${esc(g.owner)}</span><span class="tag risk">${esc(g.risk)}</span></div>
+      <p><b>${esc(g.identity)}</b> — ${esc(g.summary)}</p>
+      <ul class="tree">${g.tree.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
+      <div class="deliver-list">${g.deliverables.map(x=>`<span>${esc(x)}</span>`).join('')}</div>
+    </div>`).join('');
+}
+function renderNodes() {
+  const q = document.getElementById('searchInput')?.value.trim().toLowerCase() || '';
+  const gf = document.getElementById('gnbFilter')?.value || 'ALL';
+  const sf = document.getElementById('statusFilter')?.value || 'ALL';
+  const df = document.getElementById('domainFilter')?.value || 'ALL';
+  const filtered = NODES.filter(n => {
+    const s = savedStatus(n.id,n.status);
+    const hay = [n.id,n.gnb,n.title,n.summary,n.phase,...n.domains,...n.risk,...n.deliverables,...n.decisions,...n.dependencies,n.clickup].join(' ').toLowerCase();
+    return (!q || hay.includes(q)) && (gf==='ALL' || n.gnb===gf) && (sf==='ALL' || s===sf) && (df==='ALL' || n.domains.includes(df));
+  });
+  document.getElementById('nodes').innerHTML = filtered.map(n => {
+    const s = savedStatus(n.id,n.status);
+    const detailsOpen = compact ? '' : ' open';
+    return `<div class="node" data-id="${esc(n.id)}">
+      <div class="node-head">
+        <div><div class="node-id">${esc(n.id)} · ${esc(n.gnb)}</div><div class="node-title">${esc(n.title)}</div></div>
+        <span class="status ${cssStatus(s)}">${esc(s)}</span>
+      </div>
+      <div class="tags"><span class="phase">${esc(n.phase)}</span>${n.domains.map(d=>`<span class="tag">${esc(d)}</span>`).join('')}${n.risk.map(r=>`<span class="tag risk">${esc(r)}</span>`).join('')}</div>
+      <div class="node-summary">${esc(n.summary)}</div>
+      <select class="status-select no-print" onchange="saveStatus('${esc(n.id)}', this.value)">${STATUS_ORDER.map(x=>`<option ${x===s?'selected':''} value="${esc(x)}">${esc(x)} · ${esc(LEGEND[x]||'')}</option>`).join('')}</select>
+      <details${detailsOpen}><summary>결과물 / 완료기준 / 결정사항 보기</summary>
+        <div class="field-label">필요 결과물</div><ul class="mini-list">${n.deliverables.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+        <div class="field-label">완료 기준</div><p class="node-summary">${esc(n.acceptance)}</p>
+        <div class="field-label">결정 필요</div><ul class="mini-list">${n.decisions.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+        <div class="field-label">의존성</div><ul class="mini-list">${n.dependencies.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+        <div class="field-label">ClickUp 변환 태스크명</div><p class="node-summary"><b>${esc(n.clickup)}</b></p>
+      </details>
+      <div class="no-print"><div class="field-label">회의 메모</div><textarea placeholder="결정/수정/담당자 메모" oninput="saveMemo('${esc(n.id)}', this.value)">${esc(getMemo(n.id))}</textarea></div>
+    </div>`;
+  }).join('') || '<div class="card">검색/필터 조건에 맞는 노드가 없습니다.</div>';
+}
+function renderEntry() {
+  document.getElementById('entryTable').innerHTML = `<thead><tr><th>진입 방식</th><th>고객 질문</th><th>예시</th><th>필요 결과물</th></tr></thead><tbody>${ENTRY_MATRIX.map(r=>`<tr><td><b>${esc(r.type)}</b></td><td>${esc(r.question)}</td><td>${esc(r.examples)}</td><td>${esc(r.needs)}</td></tr>`).join('')}</tbody>`;
+}
+function renderFlow() {
+  document.getElementById('flowCards').innerHTML = FLOW.map(f => `<div class="flow-card"><span class="num">${esc(f.step)}</span><h3>${esc(f.title)}</h3><p>${esc(f.desc)}</p></div>`).join('');
+}
+function renderDeps() {
+  document.getElementById('depCards').innerHTML = SYSTEM_DEPS.map(d => `<div class="dep-card"><h3>${esc(d.name)} <span class="phase">${esc(d.phase)}</span></h3><p><b>연결:</b> ${esc(d.links)}</p><div class="tags"><span class="tag">${esc(d.owner)}</span><span class="tag risk">${esc(d.risk)}</span></div></div>`).join('');
+}
+function renderDecisions() {
+  document.getElementById('decisionTable').innerHTML = `<thead><tr><th>ID</th><th>안건</th><th>선택지</th><th>추천안</th><th>결정권자</th><th>상태</th></tr></thead><tbody>${DECISIONS.map(d => {
+    const s = localStorage.getItem('decision_' + d.id) || d.status;
+    return `<tr><td><b>${esc(d.id)}</b></td><td>${esc(d.topic)}</td><td>${esc(d.options)}</td><td>${esc(d.recommendation)}</td><td>${esc(d.owner)}</td><td><select class="decision-status no-print" onchange="localStorage.setItem('decision_${esc(d.id)}', this.value); renderDecisions();">${STATUS_ORDER.map(x=>`<option ${x===s?'selected':''} value="${esc(x)}">${esc(x)}</option>`).join('')}</select><span class="status ${cssStatus(s)}">${esc(s)}</span></td></tr>`;
+  }).join('')}</tbody>`;
+}
+function toggleCompact() { compact = !compact; renderNodes(); }
+function exportCSV() {
+  const headers = ['List','Task','Phase','Status','Domains','Deliverable','Acceptance Criteria','Dependency','Risk','Memo'];
+  const rows = NODES.filter(n => savedStatus(n.id,n.status) !== 'DROP').map(n => [
+    n.gnb,
+    n.clickup,
+    n.phase,
+    savedStatus(n.id,n.status),
+    n.domains.join(' / '),
+    n.deliverables.join(' | '),
+    n.acceptance,
+    n.dependencies.join(' | '),
+    n.risk.join(' / '),
+    getMemo(n.id)
+  ]);
+  const csv = [headers, ...rows].map(row => row.map(v => '"' + String(v ?? '').replace(/"/g,'""') + '"').join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'curapulse_ia_clickup_export.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+function init() { renderPillars(); renderKPIs(); renderControls(); renderGnbCards(); renderNodes(); renderEntry(); renderFlow(); renderDeps(); renderDecisions(); }
+init();
+</script>
+</body>
+</html>

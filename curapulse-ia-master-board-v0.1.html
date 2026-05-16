@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>CuraPulse 자사몰 IA Master Board v0.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+:root{
+  --paper:#ECE5D5; --paper-deep:#E1D8C3; --card:#F6F1E4; --card-elev:#FBF7EC;
+  --ink:#1A1A1F; --ink-2:#3D3A35; --ink-3:#6B6258; --muted:#918878;
+  --hair:#CCC2AC; --hair-soft:#D8D0BC;
+  --pulse:#C44432; --pulse-soft:#E8BFB5; --teal:#2D4A3E;
+  --go:#2D6A4F; --modify:#B8740E; --pending:#6B6258; --hide:#948B7D;
+  --drop:#A8362A; --dev:#25517A; --policy:#6B4FA0; --sku:#8B6F3D; --rd:#4F6B3D;
+  --fd:'Fraunces',serif; --fb:'Pretendard Variable',-apple-system,sans-serif; --fm:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--paper);color:var(--ink);font-family:var(--fb);font-weight:400;font-size:13.5px;line-height:1.55;letter-spacing:-0.005em;min-width:1280px}
+body{background-image:radial-gradient(circle at 20% 0%,rgba(196,68,50,.05),transparent 50%),radial-gradient(circle at 80% 100%,rgba(45,74,62,.05),transparent 50%);background-attachment:fixed}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.08 0 0 0 0 0.05 0 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.5;mix-blend-mode:multiply;z-index:1}
+.shell{position:relative;z-index:2;max-width:1640px;margin:0 auto;padding:0 48px}
+
+/* TOP */
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;padding:40px 0 28px;border-bottom:1px solid var(--ink);position:relative}
+.topbar::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:1px;background:var(--ink)}
+.brand-stack{display:flex;flex-direction:column;gap:6px}
+.brand-tag{font-family:var(--fm);font-size:10.5px;letter-spacing:.18em;color:var(--pulse);text-transform:uppercase;font-weight:500}
+.brand-title{font-family:var(--fd);font-weight:400;font-size:48px;line-height:1.02;letter-spacing:-0.02em;font-style:italic;margin-top:6px}
+.brand-title b{font-style:normal;font-weight:500}
+.brand-sub{font-size:14px;color:var(--ink-3);margin-top:10px;max-width:680px;line-height:1.55}
+.meta-block{text-align:right;font-family:var(--fm);font-size:11px;color:var(--ink-3);line-height:1.8}
+.meta-block .v{color:var(--pulse);font-weight:600;letter-spacing:.05em}
+.meta-block .d{color:var(--ink);font-weight:500}
+
+.metabar{display:flex;gap:0;padding:14px 0;border-bottom:1px solid var(--hair)}
+.mb-cell{flex:1;padding:0 24px;border-right:1px solid var(--hair-soft)}
+.mb-cell:first-child{padding-left:0}
+.mb-cell:last-child{border-right:none;padding-right:0}
+.mb-cell .lab{font-family:var(--fm);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.mb-cell .val{font-size:13px;color:var(--ink);font-weight:500}
+.mb-cell .val em{font-style:normal;color:var(--pulse)}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:208px 1fr;gap:48px;padding:36px 0 80px}
+.sidenav{position:sticky;top:24px;align-self:start;font-family:var(--fm);font-size:11.5px}
+.sidenav .nav-title{font-family:var(--fb);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;font-weight:600}
+.sidenav a{display:flex;align-items:baseline;gap:10px;padding:7px 0;color:var(--ink-2);text-decoration:none;border-bottom:1px solid transparent;transition:.2s}
+.sidenav a:hover{color:var(--pulse)}
+.sidenav a .num{color:var(--muted);font-size:10px;letter-spacing:.08em;min-width:18px}
+.sidenav a .lbl{font-family:var(--fb);font-size:13px;letter-spacing:-0.005em}
+
+.section{margin-bottom:64px;scroll-margin-top:24px}
+.sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--ink)}
+.sec-num{font-family:var(--fm);font-size:11px;color:var(--pulse);letter-spacing:.16em;font-weight:600}
+.sec-ttl{font-family:var(--fd);font-size:30px;font-weight:400;letter-spacing:-0.015em;font-style:italic}
+.sec-ttl b{font-style:normal;font-weight:500}
+.sec-desc{margin-left:auto;font-size:12px;color:var(--ink-3);max-width:520px;text-align:right;line-height:1.5}
+
+/* Strategy bridge */
+.bridge{background:var(--card);border:1px solid var(--hair);padding:32px 36px;position:relative;overflow:hidden}
+.bridge::before{content:"";position:absolute;top:0;left:0;width:4px;height:100%;background:var(--pulse)}
+.bridge-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:32px;align-items:center}
+.bridge-side{display:flex;flex-direction:column;gap:12px}
+.bridge-row{display:flex;align-items:center;gap:16px;padding:16px 20px;background:var(--card-elev);border:1px solid var(--hair-soft)}
+.bridge-side.left .bridge-row{justify-content:flex-end;text-align:right;flex-direction:row-reverse}
+.b-tag{font-family:var(--fd);font-style:italic;font-size:32px;color:var(--pulse);font-weight:500;min-width:62px;line-height:1}
+.b-desc{font-size:12.5px;color:var(--ink-2);line-height:1.45;flex:1}
+.b-desc b{display:block;font-size:13.5px;color:var(--ink);margin-bottom:3px;font-weight:600}
+.bridge-arrow{font-family:var(--fd);font-size:36px;color:var(--ink-3);opacity:.4;transform:translateY(-4px);text-align:center}
+.bridge-side.right .b-tag{font-family:var(--fb);font-weight:600;font-style:normal;font-size:12.5px;letter-spacing:.14em;color:var(--ink);background:var(--paper-deep);padding:6px 12px;min-width:auto;line-height:1.2;border:1px solid var(--ink)}
+.bridge-note{margin-top:24px;padding-top:20px;border-top:1px dashed var(--hair);font-size:12px;color:var(--ink-3);font-style:italic;line-height:1.6}
+.bridge-note b{color:var(--pulse);font-style:normal;font-weight:600}
+
+/* Main flow */
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:var(--card);border:1px solid var(--hair)}
+.flow-step{padding:18px 16px;border-right:1px solid var(--hair-soft);border-bottom:1px solid var(--hair-soft);position:relative;display:flex;flex-direction:column;gap:6px;min-height:130px}
+.flow-step:nth-child(5n){border-right:none}
+.flow-step:nth-child(n+6){border-bottom:none}
+.fs-num{font-family:var(--fm);font-size:10px;color:var(--pulse);font-weight:600;letter-spacing:.1em}
+.fs-name{font-family:var(--fd);font-size:15px;font-weight:500;letter-spacing:-0.01em;line-height:1.2}
+.fs-desc{font-size:11.5px;color:var(--ink-3);line-height:1.4;margin-top:auto}
+.fs-tag{display:inline-block;font-family:var(--fm);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;background:var(--paper-deep);color:var(--ink-2);width:fit-content;margin-top:4px}
+.fs-tag.acc{background:var(--pulse);color:#fff}
+
+/* GNB tree cards */
+.gnb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.gnb-card{background:var(--card);border:1px solid var(--hair);padding:24px 26px;position:relative;transition:.2s}
+.gnb-card:hover{background:var(--card-elev);border-color:var(--ink-2)}
+.gnb-card.dim{opacity:.85}
+.gnb-head{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid var(--hair-soft);margin-bottom:16px;gap:14px}
+.gnb-headL{flex:1}
+.gnb-id{font-family:var(--fm);font-size:9.5px;color:var(--muted);letter-spacing:.12em;margin-bottom:4px}
+.gnb-name{font-family:var(--fd);font-size:28px;font-weight:500;letter-spacing:-0.01em;line-height:1}
+.gnb-slogan{font-size:12px;color:var(--ink-3);margin-top:6px;font-style:italic;line-height:1.4}
+.gnb-map{font-family:var(--fm);font-size:10px;color:var(--pulse);letter-spacing:.12em;padding:3px 8px;border:1px solid var(--pulse);align-self:flex-start;white-space:nowrap;font-weight:600}
+.gnb-map.none{color:var(--muted);border-color:var(--hair)}
+.gnb-tree{font-family:var(--fm)}
+.tn{display:flex;align-items:center;gap:8px;padding:4px 0;color:var(--ink-2);font-size:12px}
+.tn.d2{padding-left:16px}
+.tn.d3{padding-left:32px;color:var(--ink-3)}
+.tn-bullet{color:var(--hair);font-family:var(--fm);font-size:11px}
+.tn-name{font-family:var(--fb);font-size:12.5px;font-weight:500;flex:1}
+.tn.d2 .tn-name{font-size:11.5px;font-weight:400;color:var(--ink-2)}
+.tn.d3 .tn-name{font-size:11px;font-weight:400}
+.tn-bdgs{display:flex;gap:4px;align-items:center}
+.gnb-stats{display:flex;gap:14px;margin-top:16px;padding-top:14px;border-top:1px solid var(--hair-soft);font-family:var(--fm);font-size:10px;color:var(--muted)}
+.gnb-stats span b{color:var(--ink);font-weight:600}
+
+/* Badges */
+.bdg{display:inline-flex;align-items:center;font-family:var(--fm);font-size:8.5px;font-weight:600;padding:2px 5px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;line-height:1.3}
+.bdg.go{background:var(--go);color:#fff}
+.bdg.mod{background:var(--modify);color:#fff}
+.bdg.pen{background:var(--pending);color:#fff}
+.bdg.hide{background:transparent;color:var(--hide);border:1px solid var(--hide)}
+.bdg.drop{background:var(--drop);color:#fff}
+.bdg.dev{background:var(--dev);color:#fff}
+.bdg.pol{background:var(--policy);color:#fff}
+.bdg.sku{background:var(--sku);color:#fff}
+.bdg.rd{background:var(--rd);color:#fff}
+.bdg.p1{background:transparent;color:var(--ink);border:1px solid var(--ink);font-weight:600}
+.bdg.p2{background:transparent;color:var(--ink-3);border:1px dashed var(--ink-3);font-weight:500}
+.bdg.p3{background:transparent;color:var(--muted);border:1px dotted var(--muted);font-weight:400}
+
+/* Matrix */
+.matrix{background:var(--card);border:1px solid var(--hair);overflow:hidden}
+.mat-row{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--hair-soft)}
+.mat-row:last-child{border-bottom:none}
+.mat-key{padding:18px 22px;background:var(--paper-deep);border-right:1px solid var(--hair-soft);display:flex;flex-direction:column;justify-content:center}
+.mat-key .k-name{font-family:var(--fd);font-size:19px;font-weight:500;letter-spacing:-0.01em}
+.mat-key .k-desc{font-size:11px;color:var(--ink-3);margin-top:4px;line-height:1.35}
+.mat-val{padding:16px 22px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;background:var(--card-elev);border:1px solid var(--hair-soft);font-size:11.5px;color:var(--ink-2);font-family:var(--fb)}
+.chip.acc{border-color:var(--pulse);color:var(--pulse);background:rgba(196,68,50,.04)}
+.chip.dim{color:var(--muted);border-style:dashed}
+.chip .pre{font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.08em}
+
+/* System Dependency */
+.sysdep{background:var(--card);border:1px solid var(--hair)}
+.sd-row{display:grid;grid-template-columns:42px 1.6fr 1fr 0.9fr 1.2fr 90px;gap:0;padding:14px 22px;border-bottom:1px solid var(--hair-soft);align-items:center}
+.sd-row:last-child{border-bottom:none}
+.sd-row.head{background:var(--paper-deep);font-family:var(--fm);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;padding-top:11px;padding-bottom:11px}
+.sd-row:not(.head):hover{background:var(--card-elev)}
+.sd-num{font-family:var(--fm);font-size:11px;color:var(--muted)}
+.sd-name{font-family:var(--fd);font-size:15.5px;font-weight:500;letter-spacing:-0.005em}
+.sd-name small{display:block;font-family:var(--fb);font-size:11px;color:var(--ink-3);font-weight:400;font-style:italic;margin-top:2px}
+.sd-team{font-size:11.5px;color:var(--ink-2)}
+.sd-diff{font-family:var(--fm);font-size:11px;color:var(--ink-2);letter-spacing:.06em;display:flex;align-items:center;gap:8px}
+.sd-diff .dots{letter-spacing:-2px;font-size:11px}
+.sd-diff.hi .dots{color:var(--pulse)}
+.sd-diff.mh .dots{color:var(--modify)}
+.sd-diff.md .dots{color:var(--ink-3)}
+.sd-risk{font-size:11px;color:var(--ink-3);line-height:1.4}
+.sd-phase{text-align:right;display:flex;justify-content:flex-end;gap:4px;flex-wrap:wrap}
+
+/* Decisions */
+.dec-table{background:var(--card);border:1px solid var(--hair);overflow:hidden}
+.dc-row{display:grid;grid-template-columns:60px 1.4fr 1.8fr 1.1fr 110px 70px;gap:0;padding:14px 22px;border-bottom:1px solid var(--hair-soft);align-items:start}
+.dc-row:last-child{border-bottom:none}
+.dc-row.head{background:var(--paper-deep);font-family:var(--fm);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;align-items:center}
+.dc-id{font-family:var(--fm);font-size:11px;color:var(--pulse);font-weight:600;letter-spacing:.04em}
+.dc-q{font-size:12.5px;color:var(--ink);font-weight:500;line-height:1.45;padding-right:14px}
+.dc-opts{font-size:11.5px;color:var(--ink-3);line-height:1.5;padding-right:14px}
+.dc-opts em{font-style:normal;color:var(--pulse);font-weight:500}
+.dc-rec{font-size:11.5px;color:var(--ink-2);line-height:1.5;padding-right:14px;font-style:italic}
+.dc-who{font-family:var(--fm);font-size:10.5px;color:var(--ink-2);letter-spacing:.04em;line-height:1.5}
+.dc-stat{text-align:right;font-family:var(--fm);font-size:10px}
+.stat-open{color:var(--pulse);font-weight:600}
+
+/* Legend */
+.legend{display:grid;grid-template-columns:repeat(2,1fr);gap:36px;background:var(--card);border:1px solid var(--hair);padding:28px 32px}
+.lg-block h4{font-family:var(--fm);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;font-weight:600}
+.lg-list{display:flex;flex-direction:column;gap:8px}
+.lg-item{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--ink-2)}
+.lg-item .bdg{min-width:74px;justify-content:center}
+.lg-desc{color:var(--ink-3);font-size:11.5px}
+
+/* Footer */
+.endbar{margin-top:60px;padding:24px 0;border-top:1px solid var(--ink);display:flex;justify-content:space-between;align-items:center;font-family:var(--fm);font-size:10.5px;color:var(--ink-3);letter-spacing:.06em}
+.endbar .l{color:var(--pulse);font-weight:600}
+.endbar .r{text-align:right}
+
+/* Callout */
+.callout{margin-top:18px;padding:14px 18px;background:rgba(196,68,50,.06);border-left:3px solid var(--pulse);font-size:12px;color:var(--ink-2);line-height:1.6}
+.callout b{color:var(--pulse);font-weight:600}
+
+html{scroll-behavior:smooth}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<header class="topbar">
+  <div class="brand-stack">
+    <div class="brand-tag">CuraPulse · D2C Renewal · Phase 0</div>
+    <h1 class="brand-title">자사몰 IA <b>Master Board</b></h1>
+    <p class="brand-sub">ON / IN / MIND 마케팅 대전제와 실제 GNB 실행 구조를 한 화면에서 연결하는 의사결정 보드. 각 노드의 진행 · 수정 · 숨김 · 삭제 여부를 회의 중 결정하기 위한 도구.</p>
+  </div>
+  <div class="meta-block">
+    <div>VERSION <span class="v">v0.1 — DRAFT</span></div>
+    <div>UPDATED <span class="d">2026.05.13</span></div>
+    <div>OWNER <span class="d">혁신본부 · 염태호</span></div>
+    <div>BASIS <span class="d">v4 카테고리 가이드 + 회의록</span></div>
+  </div>
+</header>
+
+<div class="metabar">
+  <div class="mb-cell"><div class="lab">기준 문서</div><div class="val">자사몰 카테고리 가이드 <em>v4</em> · 회의록 260513</div></div>
+  <div class="mb-cell"><div class="lab">다음 마일스톤</div><div class="val">다음 주 업무회의 — <em>P1 노드 GO 판정</em></div></div>
+  <div class="mb-cell"><div class="lab">결정권자</div><div class="val">조남규 대표 · 권용환 본부장</div></div>
+  <div class="mb-cell"><div class="lab">현황</div><div class="val"><em>8 미결</em> · 5 결정 필요 · 60+ 노드</div></div>
+</div>
+
+<div class="layout">
+  <nav class="sidenav">
+    <div class="nav-title">CONTENTS</div>
+    <a href="#s1"><span class="num">01</span><span class="lbl">Strategy Bridge</span></a>
+    <a href="#s2"><span class="num">02</span><span class="lbl">Main Page Flow</span></a>
+    <a href="#s3"><span class="num">03</span><span class="lbl">GNB IA Tree</span></a>
+    <a href="#s4"><span class="num">04</span><span class="lbl">Multi-Entry Matrix</span></a>
+    <a href="#s5"><span class="num">05</span><span class="lbl">System Dependency</span></a>
+    <a href="#s6"><span class="num">06</span><span class="lbl">Decision Backlog</span></a>
+    <a href="#s7"><span class="num">07</span><span class="lbl">Legend</span></a>
+  </nav>
+
+  <main>
+
+<!-- 01 STRATEGY BRIDGE -->
+<section id="s1" class="section">
+  <div class="sec-head">
+    <div class="sec-num">01</div>
+    <h2 class="sec-ttl">Strategy <b>Bridge</b></h2>
+    <div class="sec-desc">마케팅 대전제(ON/IN/MIND)와 자사몰 실제 GNB는 다른 언어로 다른 청중에게 말한다. 둘을 명시적으로 연결.</div>
+  </div>
+  <div class="bridge">
+    <div class="bridge-grid">
+      <div class="bridge-side left">
+        <div class="bridge-row">
+          <div class="b-desc"><b>피부 위에서 작동하는 케어</b>디바이스 + 외용 화장품을 통한 즉각적 케어</div>
+          <div class="b-tag">ON</div>
+        </div>
+        <div class="bridge-row">
+          <div class="b-desc"><b>몸 안에서 작동하는 케어</b>먹는 뷰티 · 이너뷰티 · 흡수 케어</div>
+          <div class="b-tag">IN</div>
+        </div>
+        <div class="bridge-row">
+          <div class="b-desc"><b>마음까지 보는 케어</b>뉴로코스메틱 · 스트레스 · 슬립</div>
+          <div class="b-tag">MIND</div>
+        </div>
+      </div>
+      <div class="bridge-arrow">⟶</div>
+      <div class="bridge-side right">
+        <div class="bridge-row">
+          <div class="b-tag">DEVICE</div>
+          <div class="b-tag">BOOSTER</div>
+        </div>
+        <div class="bridge-row">
+          <div class="b-tag">INNER</div>
+        </div>
+        <div class="bridge-row">
+          <div class="b-tag">CALM</div>
+        </div>
+      </div>
+    </div>
+    <div class="bridge-note">
+      <b>ON / IN / MIND</b>는 고객에게 세계관을 이해시키는 <b>마케팅 언어</b>이고, <b>DEVICE / BOOSTER / INNER / CALM</b>은 자사몰에서 실제 클릭하는 <b>시스템 메뉴</b>다. 메인 페이지 상단에서 ON/IN/MIND를 한 번 설명한 뒤, 클릭 가능한 메뉴는 시스템 명칭으로 노출한다.
+    </div>
+  </div>
+  <div class="callout">
+    <b>회의 결정 (조남규 대표):</b> "마케팅하고 실제 카테고리는 저기 정해진 대로 가면 돼요. 이건 대전제라는 거죠." — 함범주 본부장 지적: "일반 소비자가 봤을 때 컨셉 이해 난이도가 있다." → 메인 페이지에 <b>ON/IN/MIND 설명 블록 필수</b>.
+  </div>
+</section>
+
+<!-- 02 MAIN FLOW -->
+<section id="s2" class="section">
+  <div class="sec-head">
+    <div class="sec-num">02</div>
+    <h2 class="sec-ttl">Main Page <b>Flow</b></h2>
+    <div class="sec-desc">자사몰 메인 페이지 진입 동선 10단계. 각 블록은 별도 컴포넌트로 정의되어야 함.</div>
+  </div>
+  <div class="flow">
+    <div class="flow-step"><div class="fs-num">01</div><div class="fs-name">GNB</div><div class="fs-desc">8개 메뉴 상단 고정. DEVICE · BOOSTER · INNER · CALM · SCIENCE · COMMUNITY · BRAND · SUPPORT</div><div class="fs-tag acc">P1</div></div>
+    <div class="flow-step"><div class="fs-num">02</div><div class="fs-name">추천 빠른 진입</div><div class="fs-desc">PULSE PICK · 헤일로 · 데일리 글로우 · 슬립 케어 · 선물하기</div><div class="fs-tag acc">P1</div></div>
+    <div class="flow-step"><div class="fs-num">03</div><div class="fs-name">Hero</div><div class="fs-desc">"피부 위로, 몸 안으로, 마음까지." — 슬로건 + 메인 비주얼 + CTA</div><div class="fs-tag acc">P1</div></div>
+    <div class="flow-step"><div class="fs-num">04</div><div class="fs-name">ON / IN / MIND 설명</div><div class="fs-desc">신규 고객 컨셉 이해 블록. 함범주 지적 대응. 신규 추가 블록.</div><div class="fs-tag acc">P1·NEW</div></div>
+    <div class="flow-step"><div class="fs-num">05</div><div class="fs-name">4개 케어 라인 카드</div><div class="fs-desc">DEVICE · BOOSTER · INNER · CALM 4분면 카드. INNER/CALM은 "준비중"으로 마킹.</div><div class="fs-tag acc">P1</div></div>
+    <div class="flow-step"><div class="fs-num">06</div><div class="fs-name">SCIENCE 티저</div><div class="fs-desc">"근거가 있는 뷰티 — 임상으로 증명된 큐라펄스 →"</div><div class="fs-tag acc">P1</div></div>
+    <div class="flow-step"><div class="fs-num">07</div><div class="fs-name">ROUTINE LAB</div><div class="fs-desc">지금 인기 있는 루틴. MVP 수준 — 글쓰기·좋아요·제품 태그만.</div><div class="fs-tag">P1 MVP</div></div>
+    <div class="flow-step"><div class="fs-num">08</div><div class="fs-name">라이브 방송 예고</div><div class="fs-desc">라이브 커머스 일정 노출. 기능 자체는 P2.</div><div class="fs-tag">P2 LATER</div></div>
+    <div class="flow-step"><div class="fs-num">09</div><div class="fs-name">PHILOSOPHY 티저</div><div class="fs-desc">"큐라펄스는 왜 시작되었나 →" 7섹션 스크롤 페이지로 연결.</div><div class="fs-tag acc">P1</div></div>
+    <div class="flow-step"><div class="fs-num">10</div><div class="fs-name">Footer</div><div class="fs-desc">SUPPORT · 매장 안내 · 회사 소개 · 정책 · SNS</div><div class="fs-tag acc">P1</div></div>
+  </div>
+</section>
+
+<!-- 03 GNB IA TREE -->
+<section id="s3" class="section">
+  <div class="sec-head">
+    <div class="sec-num">03</div>
+    <h2 class="sec-ttl">GNB <b>IA Tree</b></h2>
+    <div class="sec-desc">8개 GNB와 하위 노드. 각 노드에 Phase 뱃지 + 진행 상태 뱃지가 붙는다. P2 이하는 "준비중" 또는 숨김 처리.</div>
+  </div>
+  <div class="gnb-grid">
+
+    <!-- DEVICE -->
+    <div class="gnb-card">
+      <div class="gnb-head">
+        <div class="gnb-headL">
+          <div class="gnb-id">GNB-01 · 카테고리</div>
+          <div class="gnb-name">DEVICE</div>
+          <div class="gnb-slogan">에너지 자극으로 세포를 깨우는 큐라펄스 디바이스</div>
+        </div>
+        <div class="gnb-map">ON</div>
+      </div>
+      <div class="gnb-tree">
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">듀얼테트라</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">듀얼테트라 프로</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">듀얼테트라 헤일로</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">액세서리 / 정품 부품</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">└</span><span class="tn-name">디바이스 서비스 (신규)</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg mod">MOD</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">├</span><span class="tn-name">디바이스 비교하기</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">├</span><span class="tn-name">디바이스 사용법 튜토리얼</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg mod">MOD</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">├</span><span class="tn-name">정품 인증번호 등록 ⭐</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg dev">DEV</span><span class="bdg pol">POL</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">├</span><span class="tn-name">셀러브리티 / 앰버서더</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">LATER</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">└</span><span class="tn-name">디바이스 체험단</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">LATER</span></span></div>
+      </div>
+      <div class="gnb-stats"><span>NODES <b>10</b></span><span>P1 <b>6</b></span><span>P2 <b>2</b></span><span>RISK <b>DEV / POL</b></span></div>
+    </div>
+
+    <!-- BOOSTER -->
+    <div class="gnb-card">
+      <div class="gnb-head">
+        <div class="gnb-headL">
+          <div class="gnb-id">GNB-02 · 화장품 (외용)</div>
+          <div class="gnb-name">BOOSTER</div>
+          <div class="gnb-slogan">디바이스 효과를 끌어올리는 찰떡 케미템</div>
+        </div>
+        <div class="gnb-map">ON</div>
+      </div>
+      <div class="gnb-tree">
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">부스터 루틴팩 (초보자용)</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg sku">SKU</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">부스터 솔로 (프리미엄)</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg sku">SKU</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">├</span><span class="tn-name">데일리 글로우 라인</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg mod">MOD</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">├</span><span class="tn-name">펌업 라인</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg mod">MOD</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">├</span><span class="tn-name">라이트 라인</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg mod">MOD</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">├</span><span class="tn-name">베어 라인</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg mod">MOD</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">├</span><span class="tn-name">클리어 라인</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg mod">MOD</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">└</span><span class="tn-name">컴포트 라인</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg mod">MOD</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">PULSE PICK (디바이스 × 부스터)</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg mod">MOD</span></span></div>
+        <div class="tn"><span class="tn-bullet">└</span><span class="tn-name">MY BOOSTER ROUTINE (셀프 큐레이션)</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">LATER</span></span></div>
+      </div>
+      <div class="gnb-stats"><span>NODES <b>10</b></span><span>P1 <b>9</b></span><span>RISK <b>상표권 · SKU</b></span><span>SOLO <b>7개</b></span></div>
+    </div>
+
+    <!-- INNER -->
+    <div class="gnb-card dim">
+      <div class="gnb-head">
+        <div class="gnb-headL">
+          <div class="gnb-id">GNB-03 · 이너뷰티</div>
+          <div class="gnb-name">INNER</div>
+          <div class="gnb-slogan">안에서부터 케어하는, 먹는 뷰티</div>
+        </div>
+        <div class="gnb-map">IN</div>
+      </div>
+      <div class="gnb-tree">
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">"준비중" 랜딩 페이지 ⭐</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">이너 루틴팩</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">HIDE</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">이너 솔로</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">HIDE</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">├</span><span class="tn-name">콜라겐 · 글로우 · 디톡스</span><span class="tn-bdgs"><span class="bdg p2">P2</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">└</span><span class="tn-name">안티에이징 · 슬립 (CALM 교집합)</span><span class="tn-bdgs"><span class="bdg p2">P2</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">INNER PICK</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">HIDE</span></span></div>
+        <div class="tn"><span class="tn-bullet">└</span><span class="tn-name">MY INNER ROUTINE</span><span class="tn-bdgs"><span class="bdg p3">P3</span><span class="bdg hide">HIDE</span></span></div>
+      </div>
+      <div class="gnb-stats"><span>NODES <b>7</b></span><span>P1 <b>1</b></span><span>임상완료 <b>2026.08</b></span><span>RISK <b>R&amp;D 일정</b></span></div>
+    </div>
+
+    <!-- CALM -->
+    <div class="gnb-card dim">
+      <div class="gnb-head">
+        <div class="gnb-headL">
+          <div class="gnb-id">GNB-04 · 뉴로코스메틱</div>
+          <div class="gnb-name">CALM</div>
+          <div class="gnb-slogan">마음부터 진정시키는, 뇌-피부 사이언스</div>
+        </div>
+        <div class="gnb-map">MIND</div>
+      </div>
+      <div class="gnb-tree">
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">캄 아로마 (향 단일 상품) ⭐</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg mod">MOD</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">캄 루틴팩</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">HIDE</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">캄 솔로</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">HIDE</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">├</span><span class="tn-name">슬립 · 무드 · 데이</span><span class="tn-bdgs"><span class="bdg p2">P2</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">└</span><span class="tn-name">텐션 · 아로마</span><span class="tn-bdgs"><span class="bdg p2">P2</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">CALM PICK</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">HIDE</span></span></div>
+        <div class="tn"><span class="tn-bullet">└</span><span class="tn-name">MY CALM ROUTINE</span><span class="tn-bdgs"><span class="bdg p3">P3</span><span class="bdg hide">HIDE</span></span></div>
+      </div>
+      <div class="gnb-stats"><span>NODES <b>7</b></span><span>P1 <b>1</b></span><span>FIRST <b>향</b></span><span>FUTURE <b>디바이스 확장</b></span></div>
+    </div>
+
+    <!-- SCIENCE -->
+    <div class="gnb-card">
+      <div class="gnb-head">
+        <div class="gnb-headL">
+          <div class="gnb-id">GNB-05 · 임상 · 원리</div>
+          <div class="gnb-name">SCIENCE</div>
+          <div class="gnb-slogan">Beauty, Backed by Science.</div>
+        </div>
+        <div class="gnb-map none">공통</div>
+      </div>
+      <div class="gnb-tree">
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">DEVICE SCIENCE</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">BOOSTER SCIENCE</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg mod">MOD</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">INNER SCIENCE</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">HIDE</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">CALM SCIENCE</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">HIDE</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">임상 데이터 라이브러리</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg rd">R&amp;D</span></span></div>
+        <div class="tn"><span class="tn-bullet">└</span><span class="tn-name">R&amp;D · 인증 · 파트너십</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">└</span><span class="tn-name">사이언스 모듈 6요소 (제품 상세 표준)</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg mod">MOD</span></span></div>
+      </div>
+      <div class="gnb-stats"><span>NODES <b>7</b></span><span>P1 <b>4</b></span><span>RULE <b>N수 · 기간 · 기관</b></span></div>
+    </div>
+
+    <!-- COMMUNITY -->
+    <div class="gnb-card">
+      <div class="gnb-head">
+        <div class="gnb-headL">
+          <div class="gnb-id">GNB-06 · 커뮤니티</div>
+          <div class="gnb-name">COMMUNITY</div>
+          <div class="gnb-slogan">사용자가 만드는 콘텐츠 = 가장 강력한 마케팅</div>
+        </div>
+        <div class="gnb-map none">공통</div>
+      </div>
+      <div class="gnb-tree">
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">ROUTINE LAB (MVP) ⭐</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg mod">MOD</span><span class="bdg dev">DEV</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">리뷰 통합 (포토 후기 가중)</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">AI 루틴 코치 (가짜 댓글봇 대체) ⭐</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg pol">POL</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">라이브 방송</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">LATER</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">멤버십 (뉴비 · 펄서 · 펄스 프로 · VIP)</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg dev">DEV</span></span></div>
+        <div class="tn"><span class="tn-bullet">└</span><span class="tn-name">체험단</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">LATER</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">├</span><span class="tn-name">일반 체험단</span><span class="tn-bdgs"><span class="bdg p2">P2</span></span></div>
+        <div class="tn d2"><span class="tn-bullet">└</span><span class="tn-name">디바이스 체험단 (베타)</span><span class="tn-bdgs"><span class="bdg p2">P2</span></span></div>
+      </div>
+      <div class="gnb-stats"><span>NODES <b>8</b></span><span>P1 <b>3</b></span><span>RISK <b>표시광고 · AI 표시</b></span></div>
+    </div>
+
+    <!-- BRAND -->
+    <div class="gnb-card">
+      <div class="gnb-head">
+        <div class="gnb-headL">
+          <div class="gnb-id">GNB-07 · 브랜드</div>
+          <div class="gnb-name">BRAND</div>
+          <div class="gnb-slogan">왜 큐라펄스인가?</div>
+        </div>
+        <div class="gnb-map none">공통</div>
+      </div>
+      <div class="gnb-tree">
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">PHILOSOPHY (7 섹션 스크롤)</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">앰버서더 / 셀러브리티</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">LATER</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">EWG / 지속가능성</span><span class="tn-bdgs"><span class="bdg p2">P2</span><span class="bdg hide">LATER</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">비앙글로 (자체 코스메틱 브랜드)</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">회사 소개 / 뉴스</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">매장 안내</span><span class="tn-bdgs"><span class="bdg p3">P3</span><span class="bdg hide">HIDE</span></span></div>
+        <div class="tn"><span class="tn-bullet">└</span><span class="tn-name">채용</span><span class="tn-bdgs"><span class="bdg p3">P3</span><span class="bdg hide">HIDE</span></span></div>
+      </div>
+      <div class="gnb-stats"><span>NODES <b>7</b></span><span>P1 <b>3</b></span><span>P3 HIDE <b>2</b></span></div>
+    </div>
+
+    <!-- SUPPORT -->
+    <div class="gnb-card">
+      <div class="gnb-head">
+        <div class="gnb-headL">
+          <div class="gnb-id">GNB-08 · 고객 지원</div>
+          <div class="gnb-name">SUPPORT</div>
+          <div class="gnb-slogan">언제든 닿을 수 있는 큐라펄스</div>
+        </div>
+        <div class="gnb-map none">공통</div>
+      </div>
+      <div class="gnb-tree">
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">공지사항</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">FAQ</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">1:1 문의</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">배송 · 반품 정책</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">├</span><span class="tn-name">스킨케어 사용법 가이드</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg go">GO</span></span></div>
+        <div class="tn"><span class="tn-bullet">└</span><span class="tn-name">A/S 접수 (정품등록 연동)</span><span class="tn-bdgs"><span class="bdg p1">P1</span><span class="bdg dev">DEV</span></span></div>
+      </div>
+      <div class="gnb-stats"><span>NODES <b>6</b></span><span>P1 <b>6</b></span><span>DEPEND <b>정품등록</b></span></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 04 MULTI-ENTRY MATRIX -->
+<section id="s4" class="section">
+  <div class="sec-head">
+    <div class="sec-num">04</div>
+    <h2 class="sec-ttl">Multi-Entry <b>Matrix</b></h2>
+    <div class="sec-desc">라인명을 모르는 신규 고객도 친숙한 키워드로 진입 가능. 카테고리는 4가지 진입 방식을 모두 제공.</div>
+  </div>
+  <div class="matrix">
+    <div class="mat-row">
+      <div class="mat-key">
+        <div class="k-name">라인별</div>
+        <div class="k-desc">슬로건 패키지 단위</div>
+      </div>
+      <div class="mat-val">
+        <span class="chip"><span class="pre">BOO</span>데일리 글로우</span>
+        <span class="chip"><span class="pre">BOO</span>펌업</span>
+        <span class="chip"><span class="pre">BOO</span>라이트</span>
+        <span class="chip"><span class="pre">BOO</span>베어</span>
+        <span class="chip"><span class="pre">BOO</span>클리어</span>
+        <span class="chip"><span class="pre">BOO</span>컴포트</span>
+        <span class="chip dim"><span class="pre">INN</span>콜라겐 · 글로우 · 디톡스 · 안티에이징 · 슬립</span>
+        <span class="chip dim"><span class="pre">CALM</span>슬립 · 무드 · 데이 · 텐션 · 아로마</span>
+      </div>
+    </div>
+    <div class="mat-row">
+      <div class="mat-key">
+        <div class="k-name">고민별</div>
+        <div class="k-desc">카테고리 횡단 큐레이션</div>
+      </div>
+      <div class="mat-val">
+        <span class="chip acc">탄력 · 리프팅 → 헤일로 + 펌업 + 콜라겐</span>
+        <span class="chip acc">미백 · 톤업 → 디바이스 + 라이트 + 글로우</span>
+        <span class="chip acc">진정 · 민감 → 베어 + 캄 슬립</span>
+        <span class="chip acc">슬립 · 스트레스 → 캄 전 라인 + 이너 슬립</span>
+        <span class="chip acc">모공 · 트러블 → 클리어 + (향후) 부스터 클렌저</span>
+      </div>
+    </div>
+    <div class="mat-row">
+      <div class="mat-key">
+        <div class="k-name">유형별</div>
+        <div class="k-desc">제형 · 형태 필터</div>
+      </div>
+      <div class="mat-val">
+        <span class="chip"><span class="pre">외용</span>토너</span>
+        <span class="chip"><span class="pre">외용</span>앰플</span>
+        <span class="chip"><span class="pre">외용</span>세럼</span>
+        <span class="chip"><span class="pre">외용</span>크림</span>
+        <span class="chip"><span class="pre">외용</span>패드</span>
+        <span class="chip"><span class="pre">외용</span>마스크</span>
+        <span class="chip"><span class="pre">외용</span>클렌저</span>
+        <span class="chip"><span class="pre">외용</span>미스트</span>
+        <span class="chip dim"><span class="pre">이너</span>캡슐 · 분말 · 액상 · 젤리</span>
+        <span class="chip"><span class="pre">디바이스</span>페이셜 · 바디 · 액세서리</span>
+      </div>
+    </div>
+    <div class="mat-row">
+      <div class="mat-key">
+        <div class="k-name">선물하기</div>
+        <div class="k-desc">시즌 매출 · 객단가</div>
+      </div>
+      <div class="mat-val">
+        <span class="chip"><span class="pre">시즌</span>홀리데이 · 명절 · 어버이날 · 화이트데이 · 크리스마스</span>
+        <span class="chip"><span class="pre">가격대</span>~5만 · ~10만 · ~20만 · 20만~ · 50만~</span>
+        <span class="chip"><span class="pre">대상</span>엄마 · 여친 · 친구 · 나에게 · 신혼</span>
+        <span class="chip acc"><span class="pre">옵션</span>포장 · 카드 · 익명 발송 · 영수증 분리</span>
+      </div>
+    </div>
+  </div>
+  <div class="callout">
+    <b>외주 카페24 개발자에게 핵심:</b> 다중 진입로는 단순 카테고리 등록이 아니라 <b>상품 태그 · 필터 · 진열 룰 · 중복 노출 정책</b>이 필요. 한 SKU가 여러 진입로에 동시 노출되는 구조 검증 필요.
+  </div>
+</section>
+
+<!-- 05 SYSTEM DEPENDENCY -->
+<section id="s5" class="section">
+  <div class="sec-head">
+    <div class="sec-num">05</div>
+    <h2 class="sec-ttl">System <b>Dependency</b></h2>
+    <div class="sec-desc">IA 트리만 보면 "메뉴 만들면 되겠네"처럼 보이지만 실제 개발/법무/운영 의존성이 큰 항목.</div>
+  </div>
+  <div class="sysdep">
+    <div class="sd-row head">
+      <div>#</div><div>시스템 항목</div><div>담당 영역</div><div>난이도</div><div>핵심 리스크</div><div>Phase</div>
+    </div>
+    <div class="sd-row">
+      <div class="sd-num">01</div>
+      <div class="sd-name">정품 인증번호 등록 <small>위조 방지 · 고객 DB · A/S · 리워드 허브</small></div>
+      <div class="sd-team">개발 · CS · 정책</div>
+      <div class="sd-diff hi"><span class="dots">●●●</span>상</div>
+      <div class="sd-risk">개인정보 동의 · 시리얼 검증 DB · 중복등록</div>
+      <div class="sd-phase"><span class="bdg p1">P1</span><span class="bdg dev">DEV</span></div>
+    </div>
+    <div class="sd-row">
+      <div class="sd-num">02</div>
+      <div class="sd-name">A/S 자동 연결 <small>정품등록 → A/S 접수 자동 라우팅</small></div>
+      <div class="sd-team">개발 · CS</div>
+      <div class="sd-diff hi"><span class="dots">●●●</span>상</div>
+      <div class="sd-risk">카페24 외부 시스템 연동 · CS 워크플로우</div>
+      <div class="sd-phase"><span class="bdg p1">P1</span><span class="bdg dev">DEV</span></div>
+    </div>
+    <div class="sd-row">
+      <div class="sd-num">03</div>
+      <div class="sd-name">추천 리워드 (네트워크형) <small>다단계 표현 금지 · 1-depth MVP / 2-depth 검토</small></div>
+      <div class="sd-team">개발 · 정책 · 재무</div>
+      <div class="sd-diff hi"><span class="dots">●●●</span>상</div>
+      <div class="sd-risk">방문판매법 · 카페24 1:1 한계 · 정산</div>
+      <div class="sd-phase"><span class="bdg p1">P1</span><span class="bdg dev">DEV</span><span class="bdg pol">POL</span></div>
+    </div>
+    <div class="sd-row">
+      <div class="sd-num">04</div>
+      <div class="sd-name">멤버십 등급제 <small>뉴비 · 펄서 · 펄스 프로 · 펄스 VIP / 디바이스 구매 자동 상향</small></div>
+      <div class="sd-team">개발 · 마케팅 · CS</div>
+      <div class="sd-diff mh"><span class="dots">●●○</span>중상</div>
+      <div class="sd-risk">혜택 발표 후 축소 불가 · 약관</div>
+      <div class="sd-phase"><span class="bdg p2">P2</span><span class="bdg dev">DEV</span></div>
+    </div>
+    <div class="sd-row">
+      <div class="sd-num">05</div>
+      <div class="sd-name">ROUTINE LAB <small>사용자 루틴 게시 · 좋아요 · 제품 태그 · 구매 연결</small></div>
+      <div class="sd-team">개발 · 운영 · 콘텐츠</div>
+      <div class="sd-diff mh"><span class="dots">●●○</span>중상</div>
+      <div class="sd-risk">UGC 효능 주장 · 운영 정책</div>
+      <div class="sd-phase"><span class="bdg p1">P1</span><span class="bdg dev">DEV</span></div>
+    </div>
+    <div class="sd-row">
+      <div class="sd-num">06</div>
+      <div class="sd-name">AI 루틴 코치 <small>가짜 댓글봇 폐기 → 공식 AI 표시 + 운영자 승인</small></div>
+      <div class="sd-team">AI · 콘텐츠 · 법무</div>
+      <div class="sd-diff mh"><span class="dots">●●○</span>중상</div>
+      <div class="sd-risk">공정위 가상인물 표시 의무 (26.04) · 신뢰</div>
+      <div class="sd-phase"><span class="bdg p1">P1</span><span class="bdg pol">POL</span></div>
+    </div>
+    <div class="sd-row">
+      <div class="sd-num">07</div>
+      <div class="sd-name">임상 데이터 파이프라인 <small>자체 임상 + 셀브룸 + 논문 · 표기 규칙 준수</small></div>
+      <div class="sd-team">R&amp;D · 콘텐츠 · 법무</div>
+      <div class="sd-diff md"><span class="dots">●○○</span>중</div>
+      <div class="sd-risk">표시광고법 · N수/기간/기관 4종 세트</div>
+      <div class="sd-phase"><span class="bdg p1">P1</span><span class="bdg rd">R&amp;D</span></div>
+    </div>
+    <div class="sd-row">
+      <div class="sd-num">08</div>
+      <div class="sd-name">라이브 커머스 <small>주간 정기 · 인플루언서 게스트 · 전용 할인</small></div>
+      <div class="sd-team">마케팅 · 개발 · 정책</div>
+      <div class="sd-diff md"><span class="dots">●○○</span>중</div>
+      <div class="sd-risk">표시광고법 · 실시간 과장 표현</div>
+      <div class="sd-phase"><span class="bdg p2">P2</span></div>
+    </div>
+    <div class="sd-row">
+      <div class="sd-num">09</div>
+      <div class="sd-name">선물하기 <small>옵션 · 메시지 카드 · 익명 발송 · 영수증 분리</small></div>
+      <div class="sd-team">개발 · 운영</div>
+      <div class="sd-diff md"><span class="dots">●○○</span>중</div>
+      <div class="sd-risk">카페24 기본 기능 한계 · 정산</div>
+      <div class="sd-phase"><span class="bdg p1">P1</span><span class="bdg dev">DEV</span></div>
+    </div>
+    <div class="sd-row">
+      <div class="sd-num">10</div>
+      <div class="sd-name">SKU · 루틴팩 세트 정책 <small>가장 짧은 유통기한 기준 통일</small></div>
+      <div class="sd-team">운영 · 물류</div>
+      <div class="sd-diff md"><span class="dots">●○○</span>중</div>
+      <div class="sd-risk">유통기한 혼재 · 입고 일자 차이</div>
+      <div class="sd-phase"><span class="bdg p1">P1</span><span class="bdg sku">SKU</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 DECISION BACKLOG -->
+<section id="s6" class="section">
+  <div class="sec-head">
+    <div class="sec-num">06</div>
+    <h2 class="sec-ttl">Decision <b>Backlog</b></h2>
+    <div class="sec-desc">미결 사항을 확정처럼 두면 안 된다. 다음 회의에서 결정해야 할 안건. 빨간색 = 추천안.</div>
+  </div>
+  <div class="dec-table">
+    <div class="dc-row head">
+      <div>ID</div><div>안건</div><div>선택지</div><div>추천 · 근거</div><div>결정권자</div><div>상태</div>
+    </div>
+    <div class="dc-row">
+      <div class="dc-id">D-001</div>
+      <div class="dc-q">ON / IN / MIND를 메인에 노출할 것인가</div>
+      <div class="dc-opts">노출(설명 블록) / 축소(헤로카피만) / <em>내부용으로만</em></div>
+      <div class="dc-rec">노출하되 쉬운 설명 블록 추가. 함범주 본부장 우려 반영.</div>
+      <div class="dc-who">대표 · 본부장</div>
+      <div class="dc-stat stat-open">미결</div>
+    </div>
+    <div class="dc-row">
+      <div class="dc-id">D-002</div>
+      <div class="dc-q">BOOSTER 라인명 최종 확정</div>
+      <div class="dc-opts">v4 6개 안 그대로 / <em>수정안</em> / 일부만</div>
+      <div class="dc-rec">상표권 검색 후 확정. 글로벌 진출 가능성 고려.</div>
+      <div class="dc-who">마케팅 · 대표</div>
+      <div class="dc-stat stat-open">미결</div>
+    </div>
+    <div class="dc-row">
+      <div class="dc-id">D-003</div>
+      <div class="dc-q">정품등록 시 리워드 지급</div>
+      <div class="dc-opts"><em>지급</em> / 쿠폰만 / 미지급</div>
+      <div class="dc-rec">회원 한정 지급. 비회원 등록은 별도 트랙.</div>
+      <div class="dc-who">대표 · 개발 · CS</div>
+      <div class="dc-stat stat-open">미결</div>
+    </div>
+    <div class="dc-row">
+      <div class="dc-id">D-004</div>
+      <div class="dc-q">추천 리워드 depth</div>
+      <div class="dc-opts"><em>1-depth MVP</em> / 2-depth 검토 / 보류</div>
+      <div class="dc-rec">방문판매법 리스크. 우선 1-depth로 출발 + 2-depth 법무 검토.</div>
+      <div class="dc-who">대표 · 법무</div>
+      <div class="dc-stat stat-open">미결</div>
+    </div>
+    <div class="dc-row">
+      <div class="dc-id">D-005</div>
+      <div class="dc-q">AI 댓글 자동화 방식</div>
+      <div class="dc-opts">임의 계정 30-40개 / <em>공식 AI 계정 + 승인</em> / 수동만</div>
+      <div class="dc-rec">공정위 가상인물 표시 의무화 (26.04). 임의 계정 방식 폐기 권장.</div>
+      <div class="dc-who">대표 · 정책</div>
+      <div class="dc-stat stat-open">미결</div>
+    </div>
+    <div class="dc-row">
+      <div class="dc-id">D-006</div>
+      <div class="dc-q">INNER 카테고리 오픈 시점</div>
+      <div class="dc-opts">즉시 (셀브룸 활용) / 임상 후 (8월) / <em>"준비중" 표시</em></div>
+      <div class="dc-rec">P1에 "준비중" 랜딩 노출, 임상 완료 후 본 카테고리 오픈.</div>
+      <div class="dc-who">대표 · R&amp;D</div>
+      <div class="dc-stat stat-open">미결</div>
+    </div>
+    <div class="dc-row">
+      <div class="dc-id">D-007</div>
+      <div class="dc-q">CALM 첫 상품 라인업</div>
+      <div class="dc-opts"><em>향 단일</em> / 디바이스 확장 포함 / 준비중</div>
+      <div class="dc-rec">향부터 시작. 펄스 디바이스의 뉴로 확장은 P3 로드맵.</div>
+      <div class="dc-who">대표 · 상품</div>
+      <div class="dc-stat stat-open">미결</div>
+    </div>
+    <div class="dc-row">
+      <div class="dc-id">D-008</div>
+      <div class="dc-q">IC 등급 마킹 문구 (의료기기 수준 안전성)</div>
+      <div class="dc-opts">의료기기 수준 안전성 표기 / 보류 / <em>법무 검토 후</em></div>
+      <div class="dc-rec">의료기기 표현 금지선과 안전성 표현 가능선의 경계 명확화 필요.</div>
+      <div class="dc-who">법무 · R&amp;D</div>
+      <div class="dc-stat stat-open">미결</div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 LEGEND -->
+<section id="s7" class="section">
+  <div class="sec-head">
+    <div class="sec-num">07</div>
+    <h2 class="sec-ttl">Legend &amp; <b>Conventions</b></h2>
+    <div class="sec-desc">뱃지 의미와 보드 운영 규칙.</div>
+  </div>
+  <div class="legend">
+    <div class="lg-block">
+      <h4>STATUS · 진행 상태</h4>
+      <div class="lg-list">
+        <div class="lg-item"><span class="bdg go">GO</span><span class="lg-desc">1차 오픈에 그대로 진행</span></div>
+        <div class="lg-item"><span class="bdg mod">MOD</span><span class="lg-desc">구조는 유지하되 수정 필요</span></div>
+        <div class="lg-item"><span class="bdg pen">PEN</span><span class="lg-desc">결정 대기</span></div>
+        <div class="lg-item"><span class="bdg hide">HIDE</span><span class="lg-desc">구조는 남기되 현재 숨김 / 후속 노출</span></div>
+        <div class="lg-item"><span class="bdg drop">DROP</span><span class="lg-desc">삭제 검토</span></div>
+      </div>
+    </div>
+    <div class="lg-block">
+      <h4>RISK · 검토 영역</h4>
+      <div class="lg-list">
+        <div class="lg-item"><span class="bdg dev">DEV</span><span class="lg-desc">카페24 한계 / 개발 가능성 확인 필요</span></div>
+        <div class="lg-item"><span class="bdg pol">POL</span><span class="lg-desc">법무 · 표시광고 · 개인정보 검토</span></div>
+        <div class="lg-item"><span class="bdg sku">SKU</span><span class="lg-desc">상품 · 재고 · 입고 · 세트 정책</span></div>
+        <div class="lg-item"><span class="bdg rd">R&amp;D</span><span class="lg-desc">임상 · 근거 · 표현 검토</span></div>
+      </div>
+    </div>
+    <div class="lg-block">
+      <h4>PHASE · 오픈 시점</h4>
+      <div class="lg-list">
+        <div class="lg-item"><span class="bdg p1">P1</span><span class="lg-desc">자사몰 1차 오픈에 포함</span></div>
+        <div class="lg-item"><span class="bdg p2">P2</span><span class="lg-desc">운영 안정화 후 (멤버십 · 라이브 · 체험단)</span></div>
+        <div class="lg-item"><span class="bdg p3">P3</span><span class="lg-desc">장기 확장 (디바이스 데이터 연동 · 글로벌)</span></div>
+      </div>
+    </div>
+    <div class="lg-block">
+      <h4>BOARD · 운영 규칙</h4>
+      <div class="lg-list" style="font-size:11.5px;color:var(--ink-3);line-height:1.55;gap:6px">
+        <div>· 이 보드는 v4 가이드와 회의록의 <b>시각적 인덱스</b>이지 원문 대체본이 아님</div>
+        <div>· 미결 사항은 <em style="color:var(--pulse);font-style:normal">반드시 NEED DECISION</em> 으로 표시</div>
+        <div>· "다단계"라는 표현은 외부 노출 금지 → "추천 리워드"로 통일</div>
+        <div>· GO 상태인 노드만 ClickUp 태스크로 변환</div>
+        <div>· MOD는 기획 태스크, DEV/POL CHECK는 검토 태스크로 분리</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+  </main>
+</div>
+
+<footer class="endbar">
+  <div class="l">CuraPulse Internal · Decision Board · 회의 자료</div>
+  <div class="r">v0.1 DRAFT · 회의록과 v4 가이드의 시각적 인덱스 · 원문은 별도 유지 · 다음 업무회의에서 GO 판정</div>
+</footer>
+
+</div>
+</body>
+</html>

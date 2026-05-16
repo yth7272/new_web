@@ -1,0 +1,44 @@
+{
+  "prototype": {
+    "purpose": "Decision meeting prototype",
+    "desktopOnly": true,
+    "notProductionCode": true
+  },
+  "member": {
+    "id": "mock-member-001",
+    "name": "Cura Tester",
+    "tier": "Pulse Starter",
+    "points": 4000
+  },
+  "products": [
+    {
+      "id": "device-halo",
+      "line": "DEVICE",
+      "name": "듀얼테트라 헤일로",
+      "price": 410000,
+      "tags": ["DEVICE", "SCIENCE", "PULSE PICK"]
+    },
+    {
+      "id": "booster-glow",
+      "line": "BOOSTER",
+      "name": "데일리 글로우 부스터 솔로",
+      "price": 29900,
+      "tags": ["BOOSTER", "GLOW", "ROUTINE"]
+    },
+    {
+      "id": "routine-pack",
+      "line": "BOOSTER",
+      "name": "초보자 3-Step 루틴팩",
+      "price": 39000,
+      "tags": ["ROUTINE PACK", "STARTER"]
+    }
+  ],
+  "routines": [
+    {
+      "id": "routine-001",
+      "title": "오늘의 탄력 루틴",
+      "likes": 128,
+      "productIds": ["device-halo", "booster-glow"]
+    }
+  ]
+}
