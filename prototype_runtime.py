@@ -1,19 +1,30 @@
 from pathlib import Path
 import hmac
 import os
+import tomllib
 
 import streamlit as st
 
 
 ROOT = Path(__file__).resolve().parent
-DEFAULT_PROTOTYPE_PASSWORD = "curapulse2026"
 
 
-def expected_password() -> str:
+def expected_password() -> str | None:
     try:
-        return st.secrets.get("APP_PASSWORD", DEFAULT_PROTOTYPE_PASSWORD)
+        password = st.secrets.get("APP_PASSWORD")
+        if password:
+            return str(password)
     except Exception:
-        return os.environ.get("APP_PASSWORD", DEFAULT_PROTOTYPE_PASSWORD)
+        pass
+
+    password = os.environ.get("APP_PASSWORD")
+    if password:
+        return password
+
+    local_secrets = ROOT / ".streamlit" / "secrets.toml"
+    if local_secrets.exists():
+        return tomllib.loads(local_secrets.read_text(encoding="utf-8-sig")).get("APP_PASSWORD")
+    return None
 
 
 def require_password() -> None:
@@ -40,9 +51,14 @@ def require_password() -> None:
         """,
         unsafe_allow_html=True,
     )
+    configured_password = expected_password()
+    if not configured_password:
+        st.error("APP_PASSWORD가 설정되지 않았습니다.")
+        st.stop()
+
     password = st.text_input("Password", type="password", label_visibility="collapsed")
     if st.button("Enter", type="primary", use_container_width=True):
-        if hmac.compare_digest(password, expected_password()):
+        if hmac.compare_digest(password, configured_password):
             st.session_state["prototype_unlocked"] = True
             st.rerun()
         st.error("비밀번호가 맞지 않습니다.")
